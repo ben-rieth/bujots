@@ -26,13 +26,6 @@ describe("Testing /api/jots handler", () => {
         important: false
     }
 
-    const returnedJot = {
-        ...jot,
-        id: 'id',
-        createdAt: new Date().toString(), 
-        updatedAt: new Date().toString()
-    }
-
     const mockRequestResponse = (method: RequestMethod = 'POST', body: {} = {}) => {
         
         const { req, res }: { req: NextApiRequest, res: MockResponse<NextApiResponse>} = createMocks({ method });
