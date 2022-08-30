@@ -17,7 +17,9 @@ const DateHeader : FC<DateHeaderProps> = ({date = new Date()}) => {
     )
 
     return (
-        <h1>{dateString}</h1>
+        <h1 className="text-lg font-bold text-center">
+            {dateString}
+        </h1>
     )
 }
 
