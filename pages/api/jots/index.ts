@@ -13,15 +13,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             })
         }
 
-        const jot = await prisma.jot.create({
-            data: {
-                content,
-                type,
-                important
-            }
-        });
+        try {
 
-        res.status(200).json(jot);
+            const jot = await prisma.jot.create({
+                data: {
+                    content,
+                    type,
+                    important
+                }
+            });
+
+            res.status(200).json(jot);
+        } catch(err) {
+            res.status(500).json({
+                message: "Something went wrong"
+            })
+        }
 
 
     } else {

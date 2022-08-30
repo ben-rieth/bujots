@@ -95,4 +95,18 @@ describe("Testing /api/jots handler", () => {
     });
 
 
+    it('returns a 500 code if there is a server error', async () => {
+        const { req, res } = mockRequestResponse('POST', jot);
+        
+        prismaMock.jot.create.mockRejectedValue(new Error('Database Error'));
+
+        await handler(req, res);
+
+        expect(res.statusCode).toBe(500);
+        expect(res._getJSONData()).toEqual(
+            expect.objectContaining({
+                message: "Something went wrong"
+            })
+        )
+    })
 })
