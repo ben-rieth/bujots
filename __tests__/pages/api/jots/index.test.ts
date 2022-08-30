@@ -1,13 +1,42 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createMocks, RequestMethod, MockResponse } from 'node-mocks-http';
+import { PrismaClient, Type } from '@prisma/client';
+import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
 
 import handler from 'pages/api/jots/index';
+import { prisma } from 'lib/prisma';
+
+jest.mock('lib/prisma', () => ({
+    __esModule: true,
+    prisma: mockDeep<PrismaClient>()
+}));
+
+const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe("Testing /api/jots handler", () => {
 
-    const mockRequestResponse = (method: RequestMethod = 'POST') => {
+    const jot = {
+        content: 'This is a jot',
+        type : Type.NOTE,
+        important: false
+    }
+
+    const incompleteJot = {
+        type : Type.NOTE,
+        important: false
+    }
+
+    const returnedJot = {
+        ...jot,
+        id: 'id',
+        createdAt: new Date().toString(), 
+        updatedAt: new Date().toString()
+    }
+
+    const mockRequestResponse = (method: RequestMethod = 'POST', body: {} = {}) => {
         
         const { req, res }: { req: NextApiRequest, res: MockResponse<NextApiResponse>} = createMocks({ method });
+        req.body = body;
 
         return { req, res };
     }
@@ -25,5 +54,45 @@ describe("Testing /api/jots handler", () => {
             })
         )
         
-    })
+    });
+
+    it('returns a 400 code if content, type, and important fields are not present', async () => {
+        const { req, res } = mockRequestResponse('POST', incompleteJot);
+
+        await handler(req, res);
+
+        expect(res.statusCode).toBe(400);
+        expect(res._getJSONData()).toEqual(
+            expect.objectContaining({
+                message: 'Missing one or more required fields'
+            })
+        )
+    });
+
+    it('returns a 200 code and the jot object if jot is successfully added to db', async () => {
+        const { req, res } = mockRequestResponse('POST', jot);
+
+        const date = new Date()
+
+        prismaMock.jot.create.mockResolvedValue({
+            ...jot, 
+            id: 'id',
+            createdAt: date, 
+            updatedAt: date
+        });
+
+        await handler(req, res);
+
+        expect(res.statusCode).toBe(200);
+        expect(res._getJSONData()).toEqual(
+            expect.objectContaining({
+                ...jot, 
+                id: 'id',
+                createdAt: date.toISOString(), 
+                updatedAt: date.toISOString()
+            })
+        )
+    });
+
+
 })
