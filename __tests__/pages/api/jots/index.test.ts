@@ -15,6 +15,8 @@ const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe("Testing /api/jots handler", () => {
 
+    const date = new Date();
+
     const jot = {
         content: 'This is a jot',
         type : Type.NOTE,
@@ -26,6 +28,25 @@ describe("Testing /api/jots handler", () => {
         important: false
     }
 
+    const jotsInDB = [
+        {
+            content: 'This is a jot',
+            type : Type.NOTE,
+            important: false,
+            id: 'id',
+            createdAt: date,
+            updatedAt: date
+        },
+        {
+            content: 'This is a second jot',
+            type : Type.EVENT,
+            important: false,
+            id: 'id2',
+            createdAt: date,
+            updatedAt: date,
+        },
+    ];
+
     const mockRequestResponse = (method: RequestMethod = 'POST', body: {} = {}) => {
         
         const { req, res }: { req: NextApiRequest, res: MockResponse<NextApiResponse>} = createMocks({ method });
@@ -34,16 +55,16 @@ describe("Testing /api/jots handler", () => {
         return { req, res };
     }
 
-    it('returns a 405 code if the request is not a POST request', async () => {
-        const { req, res } = mockRequestResponse('GET');
+    it('returns a 405 code if the request is not a POST or GET request', async () => {
+        const { req, res } = mockRequestResponse('PUT');
 
         await handler(req, res);
 
-        expect(res.getHeader('Allow')).toEqual(['POST'])
+        expect(res.getHeader('Allow')).toEqual(['POST', 'GET'])
         expect(res.statusCode).toBe(405);
         expect(res._getJSONData()).toEqual(
             expect.objectContaining({
-                message: 'HTTP method GET is not supported'
+                message: 'HTTP method PUT is not supported'
             })
         )
         
@@ -65,8 +86,6 @@ describe("Testing /api/jots handler", () => {
     it('returns a 200 code and the jot object if jot is successfully added to db', async () => {
         const { req, res } = mockRequestResponse('POST', jot);
 
-        const date = new Date()
-
         prismaMock.jot.create.mockResolvedValue({
             ...jot, 
             id: 'id',
@@ -86,6 +105,33 @@ describe("Testing /api/jots handler", () => {
             })
         )
     });
+
+    it('returns a list of jots when /api/jots receives a GET request', async () => {
+        const { req, res } = mockRequestResponse('GET', {});
+
+        prismaMock.jot.findMany.mockResolvedValue(jotsInDB);
+
+        await handler(req, res);
+
+        expect(res.statusCode).toBe(200);
+        expect(res._getJSONData().length).toBe(2)
+        expect(res._getJSONData()).toEqual(
+            expect.arrayContaining(
+                [
+                    {
+                        ...jotsInDB[0],
+                        createdAt: date.toISOString(),
+                        updatedAt: date.toISOString()
+                    },
+                    {
+                        ...jotsInDB[1],
+                        createdAt: date.toISOString(),
+                        updatedAt: date.toISOString()
+                    }
+                ]
+            )
+        )
+    })
 
 
     it('returns a 500 code if there is a server error', async () => {

@@ -32,11 +32,25 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         }
 
 
+    } else if (req.method === 'GET') {
+        
+        try {
+
+            const jots = await prisma.jot.findMany();
+
+            res.status(200).json(jots);
+
+        } catch (err) {
+            res.status(500).json({
+                message: 'Something went wrong'
+            })
+        }
+
     } else {
-        res.setHeader('Allow', ['POST'])
+        res.setHeader('Allow', ['POST', 'GET'])
         res.status(405).json({
             message: `HTTP method ${req.method} is not supported`
-        })
+        });
     }
 }
 
