@@ -1,6 +1,6 @@
 import {render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { IoEllipseOutline, IoTriangleOutline, IoRemove } from 'react-icons/io5';
+import userEvent from '@testing-library/user-event';
 
 import JotListItem from 'components/JotListItem';
 import { Jot, Type } from '@prisma/client';
@@ -50,5 +50,21 @@ describe("Testing Jot Component", () => {
 
         const icon = screen.getByTestId('circle-outline');
         expect(icon).toBeInTheDocument();
+    });
+
+    it('displays an edit and delete icon next to jot text when jot is clicked on', async () => {
+        const user = userEvent.setup();
+
+        render(<JotListItem jot={testJot} />);
+
+        const jot = screen.getByRole('note');
+
+        expect( screen.queryByTestId('update') ).not.toBeInTheDocument();
+        expect( screen.queryByTestId('delete') ).not.toBeInTheDocument();
+
+        await user.click(jot);
+
+        expect( screen.queryByTestId('update') ).toBeInTheDocument();
+        expect( screen.queryByTestId('delete') ).toBeInTheDocument();
     })
 })      
