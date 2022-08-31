@@ -1,8 +1,15 @@
 import DateHeader from "components/DateHeader";
 import JotList from "components/JotList";
+import NewJotForm from "components/NewJotForm";
 import { Type } from '@prisma/client';
+import axios from "axios";
+import { FormikValues } from "formik";
 
 const JotPage = () => {
+
+    const addJot = async (values: FormikValues) => {
+        await axios.post('/api/jots', values)
+    }
 
     return (
         <>
@@ -17,6 +24,7 @@ const JotPage = () => {
                     updatedAt: new Date()
                 }
             ]}/>
+            <NewJotForm onSubmit={addJot}/>
         </>
     )
 }
