@@ -105,5 +105,27 @@ describe('Testing NewJotForm Component', () => {
             type: 'EVENT',
             important: false
         })
+    });
+
+    it('marks jot as important if exclamation mark btn is pressed', async () => {
+        const user = userEvent.setup();
+        const submitFn = jest.fn();
+
+        render(<NewJotForm onSubmit={submitFn} />);
+        await user.click(screen.getByRole('button'));
+
+        const submitBtn = screen.getByRole('button');
+        const contentInput = screen.getByPlaceholderText(/This is a jot!/i);
+        const importantBtn = screen.getByTestId('important');
+
+        await user.type(contentInput, 'content');
+        await user.click(importantBtn);
+        await user.click(submitBtn);
+
+        expect(submitFn).toHaveBeenCalledWith({
+            content: 'content',
+            type: 'NOTE',
+            important: true
+        })
     })
 })

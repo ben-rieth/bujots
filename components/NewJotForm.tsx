@@ -5,6 +5,7 @@ import { useState, useRef, FC } from "react";
 import toast from "react-hot-toast";
 import { IoAdd, IoCheckmarkDoneCircle, IoEllipseOutline, IoRemove, IoTriangleOutline } from "react-icons/io5";
 import { RiLoader2Fill } from "react-icons/ri";
+import { BsExclamationCircleFill } from 'react-icons/bs';
 import * as Yup from 'yup';
 import RadioButton from "./RadioButton";
 
@@ -33,7 +34,7 @@ const NewJotForm : FC<NewJotFormProps> = ({ onSubmit }) => {
             setDisabled(true);
 
             values.type = values.type.toUpperCase();
-            await onSubmit({...values, important: false})
+            await onSubmit(values)
 
             toast.success("New Jot Added!")
 
@@ -51,12 +52,14 @@ const NewJotForm : FC<NewJotFormProps> = ({ onSubmit }) => {
                 <Formik
                     initialValues={{
                         content: '',
-                        type: 'Note'
+                        type: 'Note',
+                        important: false
                     }}
                     onSubmit={handleFormSubmit}
                     validationSchema={Yup.object({
                         content: Yup.string().required('Jot Text Required'),
-                        type: Yup.string().required('Must choose jot type')
+                        type: Yup.string().required('Must choose jot type'),
+                        important: Yup.boolean()
                     })}
                 >
                     {({ isSubmitting, values, isValid }) => (
@@ -68,6 +71,7 @@ const NewJotForm : FC<NewJotFormProps> = ({ onSubmit }) => {
                                 {values.type === "Note" && <IoRemove className="w-6 h-6" data-testid="dash"/>}
                                 {values.type === "Event" && <IoTriangleOutline className="w-6 h-6" data-testid="triangle"/>}
                                 {values.type === 'Task' && <IoEllipseOutline className="w-6 h-6" data-testid="circle"/>}
+                                
                                 <Field 
                                     type="text" 
                                     name="content" 
@@ -75,8 +79,22 @@ const NewJotForm : FC<NewJotFormProps> = ({ onSubmit }) => {
                                     disabled={disabled}
                                     className="text-lg border-b-2 outline-none border-slate-300 focus:border-cyan-500"
                                 />
-                            </div>
                                 
+                                <label>
+                                    <Field
+                                        type="checkbox"
+                                        name="important"
+                                        disabled={disabled}
+                                        className="hidden"
+                                    />
+                                    <BsExclamationCircleFill 
+                                        className={`w-8 h-8 ${values.important ? "fill-rose-500" : "fill-slate-300"}`}
+                                        data-testid="important"    
+                                    />
+                                </label>
+                                
+                            </div>
+
                             <div className="flex justify-between w-12 h-12 gap-2">
                                 <fieldset role="radiogroup" className="flex items-center ml-8">
                                     <RadioButton setName="type" value="Event" currentValue={values.type} disabled={disabled}/>
