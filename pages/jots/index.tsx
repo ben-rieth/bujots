@@ -16,15 +16,17 @@ const JotPage = () => {
     }
 
     return (
-        !error ? (
-            <>
-                <DateHeader />
-                <JotList jots={data}/>
-                <NewJotForm onSubmit={addJot}/>
-            </>
-        ): (
-            <p>Could not connect to server</p>
-        )
+        <main className="px-3">
+            {!error ? (
+                <>
+                    <DateHeader />
+                    <JotList jots={data}/>
+                    <NewJotForm onSubmit={addJot}/>
+                </>
+            ): (
+                <p>Could not connect to server</p>
+            )}
+        </main>
         
     )
 }

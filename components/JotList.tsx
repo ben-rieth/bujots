@@ -16,7 +16,14 @@ const JotList: FC<JotListProps> = ({jots = []}) => {
                 <p role="note">There are no jots yet!</p>
             }
 
-            {jots.map(jot => <JotListItem key={jot.id} jot={jot} />)}
+            {jots.map(jot => {
+                return (
+                    <>
+                        <JotListItem key={jot.id} jot={jot} />
+                        <hr key={`${jot.id}hr`}/>
+                    </>
+                )     
+            })}
         </article>
     )
 }
