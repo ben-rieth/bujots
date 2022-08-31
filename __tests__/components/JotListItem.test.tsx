@@ -66,5 +66,22 @@ describe("Testing Jot Component", () => {
 
         expect( screen.queryByTestId('update') ).toBeInTheDocument();
         expect( screen.queryByTestId('delete') ).toBeInTheDocument();
+    });
+
+    it('hides edit and delete btns when click occurs outside component', async () => {
+        const user = userEvent.setup();
+
+        render(<JotListItem jot={testJot} />);
+
+        const jot = screen.getByRole('note');
+        await user.click(jot);
+
+        expect( screen.queryByTestId('update') ).toBeInTheDocument();
+        expect( screen.queryByTestId('delete') ).toBeInTheDocument();
+
+        await user.click(document.body);
+
+        expect( screen.queryByTestId('update') ).not.toBeInTheDocument();
+        expect( screen.queryByTestId('delete') ).not.toBeInTheDocument();
     })
 })      

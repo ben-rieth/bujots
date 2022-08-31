@@ -127,5 +127,22 @@ describe('Testing NewJotForm Component', () => {
             type: 'NOTE',
             important: true
         })
+    });
+
+    it('hides the form when user clicks outside of form', async () => {
+        const user = userEvent.setup();
+        const submitFn = jest.fn();
+
+        render(<NewJotForm onSubmit={submitFn} />);
+        await user.click(screen.getByRole('button'));
+
+        expect(screen.getByRole('form')).toBeInTheDocument();
+
+        await user.click(document.body);
+
+        expect(screen.queryByRole('form')).not.toBeInTheDocument();
+        
+        const addJotBtn = screen.getByRole('button');
+        expect(addJotBtn.textContent).toBe('New Jot')
     })
 })
