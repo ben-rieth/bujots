@@ -1,13 +1,17 @@
 import DateHeader from "components/DateHeader";
 import JotList from "components/JotList";
-import NewJotForm from "components/NewJotForm";
 import { FormikValues } from "formik";
 import axios from "axios";
 import useSWR from 'swr';
+import { useState } from "react";
+import JotForm from "components/JotForm";
+import { IoAdd } from 'react-icons/io5';
 
 const fetcher = ( url:string ) => axios.get(url).then(res => res.data)
 
 const JotPage = () => {
+
+    const [newJotFormVisible, setNewJotFormVisible] = useState<boolean>(false);
 
     const { data, error } = useSWR('/api/jots', fetcher, {refreshInterval: 1000});
 
@@ -15,16 +19,24 @@ const JotPage = () => {
         await axios.post('/api/jots', values)
     }
 
+    const closeForm = () => setNewJotFormVisible(false);
+    const openForm = () => setNewJotFormVisible(true)
+
     return (
         <main className="px-3">
-            {!error ? (
-                <>
-                    <DateHeader />
-                    <JotList jots={data}/>
-                    <NewJotForm onSubmit={addJot}/>
-                </>
-            ): (
-                <p>Could not connect to server</p>
+            <DateHeader />
+            <JotList jots={data}/>
+                    
+            {newJotFormVisible ? (
+                <JotForm onSubmit={addJot} done={closeForm} />
+            ) : (
+                <button 
+                    className="flex items-center"
+                    onClick={openForm}
+                >
+                    <IoAdd data-testid="add" className="w-8 h-8"/>
+                    <p className="text-xl">New Jot</p>
+                </button>
             )}
         </main>
         
