@@ -13,31 +13,68 @@ const JotListItem : FC<JotListItemProps> = ({jot}) => {
     const { mutate } = useSWRConfig();
 
     const [formVisible, setFormVisible] = useState<boolean>(false);
+    const [internalJot, setInternalJot] = useState<Jot>(jot);
+    const [complete, setComplete] = useState<boolean>(jot.status === Status.COMPLETED);
 
     const openForm = () => setFormVisible(true);
     const closeForm = () => setFormVisible(false);
 
     const updateJot = async (values: Partial<Jot>) => {
-        await axios.patch(`/api/jots/${jot.id}`, values);
+        const oldJotValues = internalJot;
+        setInternalJot({...internalJot, ...values});
+        closeForm();
+        
+        await axios.patch(`/api/jots/${jot.id}`, values)
+            .catch((error) => {
+                setInternalJot(oldJotValues)
+                throw new Error(error);
+            });
         mutate('/api/jots')
     }
 
-    const getJotIcon = () => {
+    const toggleComplete = async () => {
+        if (jot.status === Status.DELETED) return;
+
+        const newStatus = jot.status === Status.COMPLETED ? Status.ACTIVE : Status.COMPLETED;
+
+        setComplete(!complete);
+
+        await axios.patch(`/api/jots/${jot.id}`, { status: newStatus });
+        mutate('/api/jots')
+    }
+
+    const getJotIcon = (jot: Jot) => {
         let icon = null;
         if (jot.type === Type.NOTE) {
             icon = <IoRemove data-testid="dash"  className="w-6 h-6"/>
 
-        } else if (jot.type === Type.EVENT && jot.status !== Status.COMPLETED) {
-            icon = <IoTriangleOutline data-testid="triangle-filled" className="w-6 h-6"/>;
+        } else if (jot.type === Type.EVENT && !complete) {
+            icon = <IoTriangleOutline 
+                        data-testid="triangle-outline" 
+                        className="w-6 h-6"
+                        onClick={toggleComplete}
+                    />;
 
-        } else if (jot.type === Type.EVENT && jot.status === Status.COMPLETED) {
-            icon = <IoTriangle data-testid="triangle-outline" className="w-6 h-6"/>;
+        } else if (jot.type === Type.EVENT && complete) {
+            icon = <IoTriangle 
+                        data-testid="triangle-filled" 
+                        className="w-6 h-6"
+                        onClick={toggleComplete}
+                    />;
 
-        } else if (jot.type === Type.TASK && jot.status !== Status.COMPLETED) {
-            icon = <IoEllipseOutline data-testid="circle-outline" className="w-6 h-6"/>;
+        } else if (jot.type === Type.TASK && !complete) {
+            icon = <IoEllipseOutline 
+                        data-testid="circle-outline" 
+                        className="w-6 h-6"
+                        onClick={toggleComplete}
+                    />;
 
-        } else if (jot.type === Type.TASK && jot.status === Status.COMPLETED) {
-            icon = <IoEllipse data-testid="circle-filled" className="w-6 h-6"/>;
+        } else if (jot.type === Type.TASK && complete) {
+            icon = <IoEllipse 
+                        data-testid="circle-filled" 
+                        className="w-6 h-6"
+                        onClick={toggleComplete}
+                    />;
         }
 
         return icon;
@@ -45,14 +82,10 @@ const JotListItem : FC<JotListItemProps> = ({jot}) => {
 
     return (
         !formVisible ? (
-            <p 
-                className="flex items-center gap-1 w-fit w-max-{15rem} py-1" 
-                role="note" 
-                onClick={openForm}
-            >
-                {getJotIcon()}
-                <span className="">
-                    {jot.content}
+            <p className="flex items-center gap-1 py-1" >
+                {getJotIcon(internalJot)}
+                <span className="flex-auto" onClick={openForm} data-testid="content">
+                    {internalJot.content}
                 </span>
             </p>
         ) : (

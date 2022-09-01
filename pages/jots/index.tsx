@@ -13,7 +13,7 @@ const JotPage = () => {
 
     const [newJotFormVisible, setNewJotFormVisible] = useState<boolean>(false);
 
-    const { data, error } = useSWR('/api/jots', fetcher);
+    const { data } = useSWR('/api/jots', fetcher);
     const { mutate } = useSWRConfig(); 
 
     const addJot = async (values: FormikValues) => {

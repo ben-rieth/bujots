@@ -1,4 +1,4 @@
-import {render, screen } from '@testing-library/react';
+import {render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 
@@ -53,36 +53,31 @@ describe("Testing Jot Component", () => {
         expect(icon).toBeInTheDocument();
     });
 
-    it('displays an edit and delete icon next to jot text when jot is clicked on', async () => {
+    it('display the edit form when clicked on', async () => {
         const user = userEvent.setup();
 
-        render(<JotListItem jot={testJot} />);
+        render(<JotListItem jot={testJot} />)
 
-        const jot = screen.getByRole('note');
+        const content = screen.getByTestId('content');
 
-        expect( screen.queryByTestId('update') ).not.toBeInTheDocument();
-        expect( screen.queryByTestId('delete') ).not.toBeInTheDocument();
+        await user.click(content);
 
-        await user.click(jot);
-
-        expect( screen.queryByTestId('update') ).toBeInTheDocument();
-        expect( screen.queryByTestId('delete') ).toBeInTheDocument();
+        const form = screen.getByRole('form');
+        expect(form).toBeInTheDocument();
+        expect(content).not.toBeInTheDocument();
     });
 
-    it('hides edit and delete btns when click occurs outside component', async () => {
+    it('when task or event icon is clicked, task becomes completed', async () => {
         const user = userEvent.setup();
+        testJot.type = Type.TASK;
 
         render(<JotListItem jot={testJot} />);
 
-        const jot = screen.getByRole('note');
-        await user.click(jot);
+        const taskIcon = screen.getByTestId('circle-outline');
+        expect(taskIcon).toBeInTheDocument();
 
-        expect( screen.queryByTestId('update') ).toBeInTheDocument();
-        expect( screen.queryByTestId('delete') ).toBeInTheDocument();
+        await user.click(taskIcon);
+        await screen.findByTestId('circle-filled')
 
-        await user.click(document.body);
-
-        expect( screen.queryByTestId('update') ).not.toBeInTheDocument();
-        expect( screen.queryByTestId('delete') ).not.toBeInTheDocument();
     })
 })      
