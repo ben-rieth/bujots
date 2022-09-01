@@ -3,6 +3,7 @@ import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 
 import JotForm from 'components/JotForm';
+import { Status } from '@prisma/client';
 
 const initialValues = {
     content: 'this was here',
@@ -102,5 +103,16 @@ describe("Testing JotForm Component", () => {
         await user.click(noteRadio);
         expect(screen.queryByTestId('dash')).toBeInTheDocument();
 
+    });
+
+    it('disabled input and hides radio btns when status is deleted', () => {
+        initialValues.status = Status.DELETED;
+        render(<JotForm onSubmit={jest.fn()} initialValues={initialValues}/>);
+
+        const content = screen.getByPlaceholderText(/this is a jot!/i);
+        const radiogroup = screen.queryByRole('radiogroup');
+
+        expect(content).toBeDisabled();
+        expect(radiogroup).not.toBeInTheDocument();
     });
 })

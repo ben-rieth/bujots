@@ -1,4 +1,4 @@
-import { Form, Formik, FormikValues, Field, useFormikContext } from "formik";
+import { Form, Formik, FormikValues, Field, useFormikContext, FormikProps } from "formik";
 import * as Yup from 'yup';
 import { FC, forwardRef, KeyboardEvent, RefObject, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -42,6 +42,54 @@ const OutsideClickSubmit = forwardRef<HTMLFormElement, {done: () => void}>((prop
 
 OutsideClickSubmit.displayName = "OutsideClickSubmit";
 
+const ContentInputField = (props : {values: FormikValues, disabled: boolean}) => {
+    const {
+        values,
+        disabled
+    } = props;
+    
+    return (
+        <Field 
+            type="text" 
+            name="content" 
+            placeholder="This is a Jot!"
+            disabled={disabled || values.status === "DELETED"}
+            className={`
+                flex-auto text-lg border-b-2 outline-none border-slate-300 focus:border-cyan-500
+                ${values.status === "DELETED" && "line-through decoration-from-font"}
+            `}
+        />
+
+    )
+}
+
+const TypeRadioGroup = (props: {values: FormikValues, disabled: boolean}) => {
+    const {
+        values,
+        disabled
+    } = props;
+
+    return (
+        <fieldset role="radiogroup" className="flex items-center ml-8">
+            <RadioButton 
+                setName="type" 
+                value="EVENT" 
+                currentValue={values.type} 
+                disabled={disabled} />
+            <RadioButton 
+                setName="type" 
+                value="TASK" 
+                currentValue={values.type} 
+                disabled={disabled} />
+            <RadioButton 
+                setName="type" 
+                value="NOTE" 
+                currentValue={values.type} 
+                disabled={disabled}/>
+        </fieldset>
+    )
+}
+
 const JotForm:FC<JotFormProps> = ({ initialValues=undefined, onSubmit, done = () => { /* empty function */ } }) => {
 
     const [disabled, setDisabled] = useState<boolean>(false);
@@ -55,13 +103,6 @@ const JotForm:FC<JotFormProps> = ({ initialValues=undefined, onSubmit, done = ()
             values.status = values.status.toUpperCase();
             await onSubmit(values)
 
-            if (initialValues === undefined) {
-                toast.success("New Jot Added!")
-            } else {
-                toast.success("Jot Edited!")
-            }
-
-            console.log("submit")
             done();
 
         } catch (err) {
@@ -105,17 +146,8 @@ const JotForm:FC<JotFormProps> = ({ initialValues=undefined, onSubmit, done = ()
                             {values.type === "EVENT" && <IoTriangleOutline className="w-6 h-6" data-testid="triangle"/>}
                             {values.type === 'TASK' && <IoEllipseOutline className="w-6 h-6" data-testid="circle"/>}
 
-                            <Field 
-                                type="text" 
-                                name="content" 
-                                placeholder="This is a Jot!"
-                                disabled={disabled || values.status === "DELETED"}
-                                className={`
-                                    flex-auto text-lg border-b-2 outline-none border-slate-300 focus:border-cyan-500
-                                    ${values.status === "DELETED" && "line-through decoration-from-font"}
-                                `}
-                            />
-
+                            <ContentInputField values={values} disabled={disabled}/>
+                            
                             {initialValues ? (
                                 <label>
                                     {values.status === "DELETED" &&
@@ -154,23 +186,7 @@ const JotForm:FC<JotFormProps> = ({ initialValues=undefined, onSubmit, done = ()
                             )}
                         </div>
                         {values.status !== "DELETED" &&
-                            <fieldset role="radiogroup" className="flex items-center ml-8">
-                                <RadioButton 
-                                    setName="type" 
-                                    value="EVENT" 
-                                    currentValue={values.type} 
-                                    disabled={disabled} />
-                                <RadioButton 
-                                    setName="type" 
-                                    value="TASK" 
-                                    currentValue={values.type} 
-                                    disabled={disabled} />
-                                <RadioButton 
-                                    setName="type" 
-                                    value="NOTE" 
-                                    currentValue={values.type} 
-                                    disabled={disabled}/>
-                            </fieldset>
+                            <TypeRadioGroup disabled={disabled} values={values} />
                         }
                         <OutsideClickSubmit ref={formikRef} done={done} />
                     </Form>
