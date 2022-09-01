@@ -84,7 +84,17 @@ const JotListItem : FC<JotListItemProps> = ({jot}) => {
         !formVisible ? (
             <p className="flex items-center gap-1 py-1" >
                 {getJotIcon(internalJot)}
-                <span className="flex-auto" onClick={openForm} data-testid="content">
+                <span 
+                    className={`
+                        flex-auto 
+                        ${complete && "text-green-500"}
+                        ${internalJot.status === Status.DELETED && "line-through"}
+                        ${(internalJot.important && internalJot.status !== "DELETED") 
+                            && "underline decoration-rose-500 underline-offset-2 decoration-2 font-bold"}
+                    `}
+                    onClick={openForm}
+                    data-testid="content"
+                >
                     {internalJot.content}
                 </span>
             </p>

@@ -109,8 +109,11 @@ const JotForm:FC<JotFormProps> = ({ initialValues=undefined, onSubmit, done = ()
                                 type="text" 
                                 name="content" 
                                 placeholder="This is a Jot!"
-                                disabled={disabled}
-                                className="flex-auto text-lg border-b-2 outline-none border-slate-300 focus:border-cyan-500"
+                                disabled={disabled || values.status === "DELETED"}
+                                className={`
+                                    flex-auto text-lg border-b-2 outline-none border-slate-300 focus:border-cyan-500
+                                    ${values.status === "DELETED" && "line-through decoration-from-font"}
+                                `}
                             />
 
                             {initialValues ? (
@@ -119,14 +122,20 @@ const JotForm:FC<JotFormProps> = ({ initialValues=undefined, onSubmit, done = ()
                                         <IoArrowUndoCircle 
                                             data-testid="undo"
                                             className="w-6 h-6 fill-sky-500"
-                                            onClick={() => setFieldValue("status", "ACTIVE")}
+                                            onClick={() => {
+                                                setFieldValue("status", "ACTIVE")
+                                                handleSubmit()
+                                            }}
                                         />
                                     }
                                     {values.status === "ACTIVE" &&
                                         <RiDeleteBinLine 
                                             data-testid="delete"
                                             className="w-6 h-6 fill-rose-500"
-                                            onClick={() => setFieldValue("status", "DELETED")}
+                                            onClick={() => {
+                                                setFieldValue("status", "DELETED")
+                                                handleSubmit()
+                                            }}
                                         />
                                     }
                                 </label>
@@ -144,23 +153,25 @@ const JotForm:FC<JotFormProps> = ({ initialValues=undefined, onSubmit, done = ()
                                 </label>
                             )}
                         </div>
-                        <fieldset role="radiogroup" className="flex items-center ml-8">
-                            <RadioButton 
-                                setName="type" 
-                                value="EVENT" 
-                                currentValue={values.type} 
-                                disabled={disabled} />
-                            <RadioButton 
-                                setName="type" 
-                                value="TASK" 
-                                currentValue={values.type} 
-                                disabled={disabled} />
-                            <RadioButton 
-                                setName="type" 
-                                value="NOTE" 
-                                currentValue={values.type} 
-                                disabled={disabled}/>
-                        </fieldset>
+                        {values.status !== "DELETED" &&
+                            <fieldset role="radiogroup" className="flex items-center ml-8">
+                                <RadioButton 
+                                    setName="type" 
+                                    value="EVENT" 
+                                    currentValue={values.type} 
+                                    disabled={disabled} />
+                                <RadioButton 
+                                    setName="type" 
+                                    value="TASK" 
+                                    currentValue={values.type} 
+                                    disabled={disabled} />
+                                <RadioButton 
+                                    setName="type" 
+                                    value="NOTE" 
+                                    currentValue={values.type} 
+                                    disabled={disabled}/>
+                            </fieldset>
+                        }
                         <OutsideClickSubmit ref={formikRef} done={done} />
                     </Form>
                 )}
