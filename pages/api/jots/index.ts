@@ -35,7 +35,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         
         try {
 
-            const jots = await prisma.jot.findMany();
+            const jots = await prisma.jot.findMany({
+                orderBy: { createdAt: 'asc'}
+            });
 
             res.status(200).json(jots);
 

@@ -1,60 +1,72 @@
-import { Jot, Type } from "@prisma/client";
-import useDetectOutsideClick from "hooks/useDetectOutsideClick";
-import { FC, useRef, useState } from "react";
-import { IoEllipseOutline, IoTriangleOutline, IoRemove } from 'react-icons/io5';
-import { RiDeleteBinLine, RiEditLine, RiCheckboxCircleFill } from 'react-icons/ri';
+import { Jot, Status, Type } from "@prisma/client";
+import axios from "axios";
+import { FC, useState } from "react";
+import { IoEllipseOutline, IoTriangleOutline, IoRemove, IoTriangle, IoEllipse } from 'react-icons/io5';
+import { useSWRConfig } from "swr";
+import JotForm from "./JotForm";
 
 type JotListItemProps = {
     jot: Jot
 }
 
 const JotListItem : FC<JotListItemProps> = ({jot}) => {
+    const { mutate } = useSWRConfig();
 
-    const [buttonsVisible, setButtonsVisible] = useState<boolean>(false);
+    const [formVisible, setFormVisible] = useState<boolean>(false);
 
-    const clickHandler = () => {
-        setButtonsVisible(true);
+    const openForm = () => setFormVisible(true);
+    const closeForm = () => setFormVisible(false);
+
+    const updateJot = async (values: Partial<Jot>) => {
+        await axios.patch(`/api/jots/${jot.id}`, values);
+        mutate('/api/jots')
     }
 
-    const outsideClickHandler = () => {
-        setButtonsVisible(false)
-    }
+    const getJotIcon = () => {
+        let icon = null;
+        if (jot.type === Type.NOTE) {
+            icon = <IoRemove data-testid="dash"  className="w-6 h-6"/>
 
-    const ref = useRef(null);
-    useDetectOutsideClick(ref, outsideClickHandler);
+        } else if (jot.type === Type.EVENT && jot.status !== Status.COMPLETED) {
+            icon = <IoTriangleOutline data-testid="triangle-filled" className="w-6 h-6"/>;
 
-    let jotIcon;
-    switch(jot.type) {
-        case(Type.EVENT):
-            jotIcon = <IoTriangleOutline data-testid="triangle-outline" className="w-6 h-6"/>
-            break;
-        case(Type.TASK):
-            jotIcon = <IoEllipseOutline data-testid="circle-outline" className="w-6 h-6"/>
-            break;
-        case(Type.NOTE):
-        default:
-            jotIcon = <IoRemove data-testid="dash"  className="w-6 h-6"/>
-            break;
+        } else if (jot.type === Type.EVENT && jot.status === Status.COMPLETED) {
+            icon = <IoTriangle data-testid="triangle-outline" className="w-6 h-6"/>;
+
+        } else if (jot.type === Type.TASK && jot.status !== Status.COMPLETED) {
+            icon = <IoEllipseOutline data-testid="circle-outline" className="w-6 h-6"/>;
+
+        } else if (jot.type === Type.TASK && jot.status === Status.COMPLETED) {
+            icon = <IoEllipse data-testid="circle-filled" className="w-6 h-6"/>;
+        }
+
+        return icon;
     }
 
     return (
-        <div className="py-1">
-            <p className="flex items-center gap-1 w-fit w-max-{15rem}" role="note" ref={ref} onClick={clickHandler}>
-                {jotIcon}
+        !formVisible ? (
+            <p 
+                className="flex items-center gap-1 w-fit w-max-{15rem} py-1" 
+                role="note" 
+                onClick={openForm}
+            >
+                {getJotIcon()}
                 <span className="">
                     {jot.content}
                 </span>
-
-                
             </p>
-            {buttonsVisible &&
-                <div className="flex gap-2 pl-7">
-                    <RiCheckboxCircleFill data-testid="complete" className="w-7 h-7 fill-green-500" />
-                    <RiEditLine data-testid='update' className="w-7 h-7 fill-sky-500"/>
-                    <RiDeleteBinLine data-testid='delete' className="w-7 h-7 fill-rose-500"/>
-                </div>
-            }
-        </div>
+        ) : (
+            <JotForm 
+                onSubmit={updateJot}
+                done={closeForm}
+                initialValues={{
+                    content: jot.content,
+                    status: jot.status,
+                    important: jot.important,
+                    type: jot.type
+                }}
+            />
+        )
     )
 }
 
