@@ -18,7 +18,7 @@ describe("Testing /api/jots handler", () => {
     const date = new Date();
 
     const jot = {
-        content: 'This is a jot',
+        content: 'This is jot',
         type : Type.NOTE,
         important: false
     }
@@ -30,7 +30,7 @@ describe("Testing /api/jots handler", () => {
 
     const jotsInDB : Jot[] = [
         {
-            content: 'This is a jot',
+            content: 'This is jot',
             type : Type.NOTE,
             status: Status.ACTIVE,
             important: false,

@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 
 import NewJotForm from 'components/NewJotForm'
 
-describe('Testing NewJotForm Component', () => {
+describe.skip('Testing NewJotForm Component', () => {
     it('initially displays button to add a new jot', () => {
         render(<NewJotForm onSubmit={jest.fn()} />);
 
