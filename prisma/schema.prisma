@@ -16,10 +16,17 @@ enum Type {
   NOTE
 }
 
+enum Status {
+  COMPLETED
+  DELETED
+  ACTIVE
+}
+
 model Jot {
   id        String @id @default(cuid())
   content   String
   type      Type
+  status    Status @default(ACTIVE)
   important Boolean
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
