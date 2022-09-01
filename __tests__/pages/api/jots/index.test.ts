@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createMocks, RequestMethod, MockResponse } from 'node-mocks-http';
-import { PrismaClient, Type } from '@prisma/client';
+import { Jot, PrismaClient, Status, Type } from '@prisma/client';
 import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
 
 import handler from 'pages/api/jots/index';
@@ -28,10 +28,11 @@ describe("Testing /api/jots handler", () => {
         important: false
     }
 
-    const jotsInDB = [
+    const jotsInDB : Jot[] = [
         {
             content: 'This is a jot',
             type : Type.NOTE,
+            status: Status.ACTIVE,
             important: false,
             id: 'id',
             createdAt: date,
@@ -40,6 +41,7 @@ describe("Testing /api/jots handler", () => {
         {
             content: 'This is a second jot',
             type : Type.EVENT,
+            status: Status.ACTIVE,
             important: false,
             id: 'id2',
             createdAt: date,
@@ -89,6 +91,7 @@ describe("Testing /api/jots handler", () => {
         prismaMock.jot.create.mockResolvedValue({
             ...jot, 
             id: 'id',
+            status: Status.ACTIVE,
             createdAt: date, 
             updatedAt: date
         });

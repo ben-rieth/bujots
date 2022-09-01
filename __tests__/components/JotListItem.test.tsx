@@ -3,13 +3,14 @@ import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 
 import JotListItem from 'components/JotListItem';
-import { Jot, Type } from '@prisma/client';
+import { Jot, Type, Status } from '@prisma/client';
 
 describe("Testing Jot Component", () => {
 
     const testJot : Jot = {
         id: 'id',
         content: 'This is a jot',
+        status: Status.ACTIVE,
         type: Type.NOTE,
         important: false,
         createdAt: new Date(),
