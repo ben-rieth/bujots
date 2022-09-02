@@ -1,30 +1,62 @@
 import { Jot } from "@prisma/client";
-import { FC } from "react";
+import { FC, useState } from "react";
+import useSWR, { Fetcher, useSWRConfig } from "swr";
+import axios from 'axios';
+import DateHeader from "./DateHeader";
 import JotListItem from "./JotListItem";
+import JotForm from "./JotForm";
+import { IoAdd } from "react-icons/io5";
+import { isToday } from "date-fns";
 
 type JotListProps = {
-    jots?: Jot[]
+    date: Date
 }
 
-const JotList: FC<JotListProps> = ({jots = []}) => {
+const fetcher: Fetcher<Jot[], string> = ( url:string ) => axios.get(url).then(res => res.data);
 
-    const isEmpty = jots.length === 0;
+const JotList: FC<JotListProps> = ({ date}) => {
+
+    const [newJotFormVisible, setNewJotFormVisible] = useState<boolean>(false);
+
+    const { data } = useSWR('/api/jots', fetcher);
+    const { mutate } = useSWRConfig(); 
+
+    const addJot = async (values: Partial<Jot>) => {
+        const newJot = await axios.post('/api/jots', values)
+        mutate('/api/jots', [...data!, newJot])
+    }
+
+    const closeForm = () => setNewJotFormVisible(false);
+    const openForm = () => setNewJotFormVisible(true)
 
     return (
-        <article>
-            {isEmpty &&
-                <p role="note">There are no jots yet!</p>
-            }
+        <section data-testid="section">
+            <DateHeader date={date}/>
 
-            {jots.map(jot => {
+            {data && data.map((jot: Jot) => {
                 return (
-                    <>
-                        <JotListItem key={jot.id} jot={jot} />
-                        <hr key={`${jot.id}hr`}/>
-                    </>
+                    <div key={jot.id}>
+                        <JotListItem jot={jot} />
+                        <hr />
+                    </div>
                 )     
             })}
-        </article>
+
+            {newJotFormVisible && (
+                <JotForm onSubmit={addJot} done={closeForm} />
+            )} 
+
+            {!newJotFormVisible && isToday(date) && (
+                <button 
+                    className="flex items-center"
+                    onClick={openForm}
+                >
+                    <IoAdd data-testid="add" className="w-6 h-6"/>
+                    <p className="text-lg">New Jot</p>
+                </button>
+            )}
+            
+        </section>
     )
 }
 

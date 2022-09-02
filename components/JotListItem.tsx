@@ -82,7 +82,7 @@ const JotListItem : FC<JotListItemProps> = ({jot}) => {
 
     return (
         !formVisible ? (
-            <p className="flex items-center gap-1 py-1" >
+            <article className="flex items-center gap-1 py-1" >
                 {getJotIcon(internalJot)}
                 <span 
                     className={`
@@ -97,7 +97,7 @@ const JotListItem : FC<JotListItemProps> = ({jot}) => {
                 >
                     {internalJot.content}
                 </span>
-            </p>
+            </article>
         ) : (
             <JotForm 
                 onSubmit={updateJot}

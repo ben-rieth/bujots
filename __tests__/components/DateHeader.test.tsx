@@ -31,14 +31,4 @@ describe('Testing DateHeader Component', () => {
 
         expect(header.textContent).toBe("December 17, 1995")
     });
-
-    it('renders back arrow but no forward arrow date is today', () => {
-        render(<DateHeader />);
-        
-        const back = screen.getByTestId("back");
-        const forward = screen.queryByTestId("forward");
-
-        expect(back).toBeInTheDocument();
-        expect(forward).not.toBeInTheDocument();
-    })
 })
