@@ -14,7 +14,8 @@ describe("Testing Jot Component", () => {
         type: Type.NOTE,
         important: false,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        date: new Date()
     }
 
     it('displays the text content of the jot', () => {

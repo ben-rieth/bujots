@@ -26,7 +26,8 @@ const fullJot : Jot = {
     important: false,
     id: 'id',
     createdAt: date,
-    updatedAt: date
+    updatedAt: date,
+    date: date
 }
 
 describe('Testing /api/jots/[id] api handler', () => {
@@ -68,7 +69,8 @@ describe('Testing /api/jots/[id] api handler', () => {
             expect.objectContaining({
                 ...fullJot,
                 createdAt: date.toISOString(),
-                updatedAt: date.toISOString()
+                updatedAt: date.toISOString(),
+                date: date.toISOString()
             })
         )
     });

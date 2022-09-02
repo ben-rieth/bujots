@@ -9,7 +9,7 @@ const initialValues = {
     content: 'this was here',
     important: false,
     type: 'EVENT',
-    status: 'ACTIVE'
+    status: 'ACTIVE',
 }
 
 describe("Testing JotForm Component", () => {

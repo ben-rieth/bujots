@@ -36,7 +36,8 @@ describe("Testing /api/jots handler", () => {
             important: false,
             id: 'id',
             createdAt: date,
-            updatedAt: date
+            updatedAt: date,
+            date: date
         },
         {
             content: 'This is a second jot',
@@ -46,6 +47,7 @@ describe("Testing /api/jots handler", () => {
             id: 'id2',
             createdAt: date,
             updatedAt: date,
+            date: date
         },
     ];
 
@@ -93,7 +95,8 @@ describe("Testing /api/jots handler", () => {
             id: 'id',
             status: Status.ACTIVE,
             createdAt: date, 
-            updatedAt: date
+            updatedAt: date,
+            date: date
         });
 
         await handler(req, res);
@@ -124,12 +127,14 @@ describe("Testing /api/jots handler", () => {
                     {
                         ...jotsInDB[0],
                         createdAt: date.toISOString(),
-                        updatedAt: date.toISOString()
+                        updatedAt: date.toISOString(),
+                        date: date.toISOString()
                     },
                     {
                         ...jotsInDB[1],
                         createdAt: date.toISOString(),
-                        updatedAt: date.toISOString()
+                        updatedAt: date.toISOString(),
+                        date: date.toISOString()
                     }
                 ]
             )
