@@ -11,7 +11,6 @@ describe('Testing DateHeader Component', () => {
         const date = (new Date()).toLocaleDateString(
             undefined, 
             {
-                weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
@@ -30,6 +29,16 @@ describe('Testing DateHeader Component', () => {
 
         const header = screen.getByRole('heading');
 
-        expect(header.textContent).toBe("Sunday, December 17, 1995")
+        expect(header.textContent).toBe("December 17, 1995")
+    });
+
+    it('renders back arrow but no forward arrow date is today', () => {
+        render(<DateHeader />);
+        
+        const back = screen.getByTestId("back");
+        const forward = screen.queryByTestId("forward");
+
+        expect(back).toBeInTheDocument();
+        expect(forward).not.toBeInTheDocument();
     })
 })
