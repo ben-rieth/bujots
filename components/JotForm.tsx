@@ -69,7 +69,7 @@ const TypeRadioGroup = (props: {values: FormikValues, disabled: boolean}) => {
     } = props;
 
     return (
-        <fieldset role="radiogroup" className="flex items-center ml-8">
+        <fieldset role="radiogroup" className="flex items-center p-1 mx-auto divide-x rounded divide-slate-400 bg-slate-200 w-fit">
             <RadioButton 
                 setName="type" 
                 value="EVENT" 
@@ -133,7 +133,7 @@ const JotForm:FC<JotFormProps> = ({ initialValues=undefined, onSubmit, done = ()
                     <Form 
                         ref={formikRef}
                         name="new-jot-form"
-                        className="flex flex-col gap-2"
+                        className="flex flex-col gap-1"
                         onKeyDown={(event: KeyboardEvent) => {
                             if (event.key === 'Enter') {
                                 dirty ? handleSubmit() : done()

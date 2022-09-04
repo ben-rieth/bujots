@@ -75,60 +75,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             })
         }
 
-        // let cursor = req.query.cursor as string;
-
-        // try {
-
-        //     let lists;
-        //     if (!cursor) {
-        //         lists = await prisma.dailyList.findMany({
-        //             take: 7,
-        //             orderBy: {
-        //                 date: 'asc'
-        //             }
-        //         });
-
-                
-        //     } else {
-
-        //         lists = await prisma.dailyList.findMany({
-        //             take: 7,
-        //             skip: 1,
-        //             cursor: {
-        //                 id: cursor
-        //             },
-        //             orderBy: {
-        //                 date: 'asc'
-        //             }
-        //         })
-        //     }
-
-        //     cursor = lists[6].id;
-
-        //     res.status(200).json({
-        //         lists,
-        //         cursor
-        //     });
-            
-        // } catch (err) {
-        //     res.status(500).json({
-        //         message: 'Something went wrong'
-        //     })
-        // }
-
-        // try {
-        //     const jots = await prisma.jot.findMany({
-        //         orderBy: { createdAt: 'asc'}
-        //     });
-
-        //     res.status(200).json(jots);
-
-        // } catch (err) {
-        //     res.status(500).json({
-        //         message: 'Something went wrong'
-        //     })
-        // }
-
     } else {
         res.setHeader('Allow', ['POST', 'GET'])
         res.status(405).json({

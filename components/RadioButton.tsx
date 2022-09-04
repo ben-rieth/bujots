@@ -11,10 +11,13 @@ type RadioButtonProps = {
 const RadioButton: FC<RadioButtonProps> = ({ setName, value, currentValue, disabled }) => {
     return (
         <label 
-            className={`p-1 w-14 text-center outline outline-2 outline-slate-300 cursor-pointer ${currentValue === value && "bg-cyan-500"}`}
+            className="flex items-center justify-center px-1"
         >
             <Field type="radio" name={setName} value={value} className="hidden" disabled={disabled} />
-            {value}
+            <p className={
+                `py-1 px-2 w-16 text-center cursor-pointer rounded text-sm
+                ${currentValue === value && "bg-white"}
+            `}>{value}</p>
         </label>
     )
 }
