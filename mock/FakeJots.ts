@@ -2,7 +2,7 @@ import { Type, Jot, Status } from '@prisma/client';
 
 const date = new Date()
 
-const jotsInDB = [
+const jotsInDB: Jot[] = [
     {
         content: 'This is jot',
         type : Type.NOTE,
@@ -11,7 +11,7 @@ const jotsInDB = [
         id: 'id',
         createdAt: date,
         updatedAt: date,
-        date: date
+        listId: 'listId'
     },
     {
         content: 'This is a second jot',
@@ -21,7 +21,7 @@ const jotsInDB = [
         id: 'id2',
         createdAt: date,
         updatedAt: date,
-        date: date
+        listId: 'listId'
     }
 ]
 
@@ -34,7 +34,7 @@ const returnedJots = [
         id: 'id',
         createdAt: date.toISOString(),
         updatedAt: date.toISOString(),
-        date: date.toISOString()
+        listId: 'listId'
     },
     {
         content: 'This is a second jot',
@@ -44,7 +44,7 @@ const returnedJots = [
         id: 'id2',
         createdAt: date.toISOString(),
         updatedAt: date.toISOString(),
-        date: date.toISOString()
+        listId: 'listId'
     }
 ]
 

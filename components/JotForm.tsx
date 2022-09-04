@@ -1,13 +1,12 @@
-import { Form, Formik, FormikValues, Field, useFormikContext, FormikProps } from "formik";
+import { Form, Formik, FormikValues, Field, useFormikContext } from "formik";
 import * as Yup from 'yup';
 import { FC, forwardRef, KeyboardEvent, RefObject, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { IoEllipseOutline, IoRemove, IoTriangleOutline, IoArrowUndoCircle } from "react-icons/io5";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { BsExclamationCircleFill } from 'react-icons/bs';
-import { Status, Type } from "@prisma/client";
 import useDetectOutsideClick from "hooks/useDetectOutsideClick";
-import { doesNotMatch } from "assert";
+
 import RadioButton from "./RadioButton";
 
 type JotFormProps = {

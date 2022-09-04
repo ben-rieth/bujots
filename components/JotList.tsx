@@ -1,29 +1,47 @@
-import { Jot } from "@prisma/client";
-import { FC, useState } from "react";
+import { DailyList, Jot } from "@prisma/client";
+import { FC, useEffect, useState } from "react";
 import useSWR, { Fetcher, useSWRConfig } from "swr";
 import axios from 'axios';
 import DateHeader from "./DateHeader";
 import JotListItem from "./JotListItem";
 import JotForm from "./JotForm";
 import { IoAdd } from "react-icons/io5";
-import { isToday } from "date-fns";
+import { isToday, startOfToday, sub } from "date-fns";
 
 type JotListProps = {
-    date: Date
+    date?: Date
+    daysAgo?: number
 }
 
-const fetcher: Fetcher<Jot[], string> = ( url:string ) => axios.get(url).then(res => res.data);
+const fetcher: Fetcher<(DailyList & { jots: Jot[]}), string> = ( url:string ) => axios.get(url).then(res => res.data);
 
-const JotList: FC<JotListProps> = ({ date}) => {
+const JotList: FC<JotListProps> = ({ date=new Date(), daysAgo=0 }) => {
+
+    const today = startOfToday();
+    const listDate = sub(today, { days: daysAgo});
 
     const [newJotFormVisible, setNewJotFormVisible] = useState<boolean>(false);
+    const [jots, setJots] = useState<Jot[]>([]);
 
-    const { data } = useSWR('/api/jots', fetcher);
+    const { data } = useSWR(`/api/jots?daysAgo=${daysAgo}`, fetcher);
     const { mutate } = useSWRConfig(); 
 
+    useEffect(() => {
+        if(data) {
+            setJots(data.jots)
+        }
+    }, [data])
+
     const addJot = async (values: Partial<Jot>) => {
-        const newJot = await axios.post('/api/jots', values)
-        mutate('/api/jots', [...data!, newJot])
+        const newJot = await axios.post('/api/jots', values).then(res => res.data)
+        mutate(
+            '/api/jots',
+            setJots([...jots, newJot]),
+            {
+                optimisticData: newJot,
+                rollbackOnError: true
+            }
+        )
     }
 
     const closeForm = () => setNewJotFormVisible(false);
@@ -31,9 +49,9 @@ const JotList: FC<JotListProps> = ({ date}) => {
 
     return (
         <section data-testid="section">
-            <DateHeader date={date}/>
+            <DateHeader date={listDate}/>
 
-            {data && data.map((jot: Jot) => {
+            {jots && jots.map((jot: Jot) => {
                 return (
                     <div key={jot.id}>
                         <JotListItem jot={jot} />
@@ -46,7 +64,7 @@ const JotList: FC<JotListProps> = ({ date}) => {
                 <JotForm onSubmit={addJot} done={closeForm} />
             )} 
 
-            {!newJotFormVisible && isToday(date) && (
+            {!newJotFormVisible && isToday(listDate) && (
                 <button 
                     className="flex items-center"
                     onClick={openForm}

@@ -1,7 +1,7 @@
 import {render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
-import { startOfYesterday } from 'date-fns';
+import { format, startOfToday, startOfYesterday } from 'date-fns';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 
@@ -12,7 +12,11 @@ const server = setupServer(
     rest.get('/api/jots', (req, res, ctx) => {
         return res(
             ctx.status(200),
-            ctx.json(returnedJots)
+            ctx.json({
+                id: 'listId',
+                date: new Date().toISOString(),
+                jots: returnedJots
+            })
         )
     })
 );
@@ -24,12 +28,14 @@ afterEach(() => server.resetHandlers())
 
 describe("Testing JotList Component", () => {
 
-    it('contains a header for the specified date', () => {
-        const providedDate = new Date('1995-12-17T03:24:00')
+    it('contains a header for the date', () => {
 
-        render(<JotList date={providedDate} />);
+        const today = startOfToday();
+        const formattedDate = format(today, 'MMMM d, yyyy')
 
-        expect(screen.getByRole('heading').textContent).toBe("December 17, 1995")
+        render(<JotList daysAgo={0} />);
+
+        expect(screen.getByRole('heading').textContent).toBe(formattedDate)
     });
 
     it("reveals JotForm when Add Jot is clicked", async () => {
@@ -46,16 +52,15 @@ describe("Testing JotList Component", () => {
     });
 
     it("does not show Add Jot btn when not today", () => {
-        const yesterday = startOfYesterday();
 
-        render(<JotList date={yesterday} />);
+        render(<JotList daysAgo={1} />);
 
         const addBtn = screen.queryByTestId('add');
         expect(addBtn).not.toBeInTheDocument();
     });
 
     it("gets jots from the server and displays them on screen", () => {
-        render(<JotList date={new Date()} />);
+        render(<JotList daysAgo={0} />);
 
         const jots = screen.getAllByRole('article');
 

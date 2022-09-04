@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "lib/prisma";
+import { startOfToday, sub } from "date-fns";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
@@ -14,17 +15,27 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         }
 
         try {
+            const today = startOfToday()
+
+            const list = await prisma.dailyList.upsert({
+                where: { date: today },
+                update: {},
+                create: {}
+            })
 
             const jot = await prisma.jot.create({
                 data: {
                     content,
                     type,
-                    important
+                    important,
+                    listId: list.id
                 }
             });
 
             res.status(200).json(jot);
         } catch(err) {
+
+            console.log(err)
             res.status(500).json({
                 message: "Something went wrong"
             })
@@ -32,20 +43,91 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 
     } else if (req.method === 'GET') {
-        
-        try {
 
-            const jots = await prisma.jot.findMany({
-                orderBy: { createdAt: 'asc'}
-            });
+        let daysAgo = req.query.daysAgo as string;
 
-            res.status(200).json(jots);
+        if(!daysAgo) daysAgo = "0"
 
-        } catch (err) {
-            res.status(500).json({
-                message: 'Something went wrong'
+        if(isNaN(parseInt(daysAgo))) {
+            return res.status(400).json({
+                message: "daysAgo parameter must be a number"
             })
         }
+
+        const today = startOfToday();
+        const targetDay = sub(today, { days: Number(daysAgo)});
+
+        try {
+
+            const list = await prisma.dailyList.findUnique({
+                where: { date: targetDay },
+                include: {
+                    jots: true
+                }
+            });
+
+            res.status(200).json(list);
+
+        } catch(err) {
+            //console.log(err)
+            res.status(500).json({
+                message: "Something went wrong"
+            })
+        }
+
+        // let cursor = req.query.cursor as string;
+
+        // try {
+
+        //     let lists;
+        //     if (!cursor) {
+        //         lists = await prisma.dailyList.findMany({
+        //             take: 7,
+        //             orderBy: {
+        //                 date: 'asc'
+        //             }
+        //         });
+
+                
+        //     } else {
+
+        //         lists = await prisma.dailyList.findMany({
+        //             take: 7,
+        //             skip: 1,
+        //             cursor: {
+        //                 id: cursor
+        //             },
+        //             orderBy: {
+        //                 date: 'asc'
+        //             }
+        //         })
+        //     }
+
+        //     cursor = lists[6].id;
+
+        //     res.status(200).json({
+        //         lists,
+        //         cursor
+        //     });
+            
+        // } catch (err) {
+        //     res.status(500).json({
+        //         message: 'Something went wrong'
+        //     })
+        // }
+
+        // try {
+        //     const jots = await prisma.jot.findMany({
+        //         orderBy: { createdAt: 'asc'}
+        //     });
+
+        //     res.status(200).json(jots);
+
+        // } catch (err) {
+        //     res.status(500).json({
+        //         message: 'Something went wrong'
+        //     })
+        // }
 
     } else {
         res.setHeader('Allow', ['POST', 'GET'])

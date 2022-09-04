@@ -30,5 +30,13 @@ model Jot {
   important Boolean
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  date      DateTime @default(now())
+  listId    String
+
+  list      DailyList     @relation(fields: [listId], references: [id])
+}
+
+model DailyList {
+  id   String   @id @default(cuid())
+  date DateTime @default(now()) @db.Date @unique
+  jots Jot[]
 }
