@@ -111,7 +111,7 @@ const JotListItem : FC<JotListItemProps> = ({jot, isToday, onMigrate }) => {
                 >
                     {internalJot.content}
                 </span>
-                {(!isToday && !complete) &&
+                {(!isToday && !complete && jot.type !== "NOTE") &&
                     <IoArrowForwardCircle 
                         onClick={onMigrate}
                         data-testid="arrow" 
