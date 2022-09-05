@@ -22,7 +22,7 @@ const JotList: FC<JotListProps> = ({ daysAgo }) => {
     const [newJotFormVisible, setNewJotFormVisible] = useState<boolean>(false);
     const [jots, setJots] = useState<Jot[]>([]);
 
-    const { data } = useSWR(`/api/jots?daysAgo=${daysAgo}`, fetcher);
+    const { data } = useSWR(`/api/jots?daysAgo=${daysAgo}`, fetcher, { refreshInterval: 1000 });
     const { mutate } = useSWRConfig(); 
 
     useEffect(() => {
@@ -43,6 +43,18 @@ const JotList: FC<JotListProps> = ({ daysAgo }) => {
         )
     }
 
+    const migrateJot = async (id: string) => {
+        await axios.patch(`/api/jots/${id}?migrate=true`);
+        mutate(
+            '/api/jots',
+            setJots(jots.filter((jot) => jot.id !== id)),
+            {
+                optimisticData: jots,
+                rollbackOnError: true
+            }
+        )
+    }
+
     const closeForm = () => setNewJotFormVisible(false);
     const openForm = () => setNewJotFormVisible(true)
 
@@ -53,7 +65,7 @@ const JotList: FC<JotListProps> = ({ daysAgo }) => {
             {jots && jots.map((jot: Jot) => {
                 return (
                     <div key={jot.id}>
-                        <JotListItem jot={jot} isToday={isToday(listDate)} />
+                        <JotListItem jot={jot} isToday={isToday(listDate)} onMigrate={() => migrateJot(jot.id)} />
                         <hr />
                     </div>
                 )     

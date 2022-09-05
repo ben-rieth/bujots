@@ -31,13 +31,14 @@ const fullJot : Jot = {
 }
 
 describe('Testing /api/jots/[id] api handler', () => {
-    const mockRequestResponse = (method: RequestMethod, body: {} = {}, id="id") => {
+    const mockRequestResponse = (method: RequestMethod, body: {} = {}, query: {} = {}) => {
         const { 
             req, 
             res 
-        } : { req: NextApiRequest, res: MockResponse<NextApiResponse> } = createMocks({ method, query: { id: id } });
+        } : { req: NextApiRequest, res: MockResponse<NextApiResponse> } = createMocks({ method });
 
         req.body = body;
+        req.query = query;
         
 
         return { req, res };
@@ -58,7 +59,7 @@ describe('Testing /api/jots/[id] api handler', () => {
     });
 
     it('returns a 200 status if jot is updated successfully', async () => {
-        const { req, res } = mockRequestResponse('PATCH', jot, "id");
+        const { req, res } = mockRequestResponse('PATCH', jot, { id: 'id'});
 
         prismaMock.jot.update.mockResolvedValue(fullJot);
 
@@ -74,8 +75,29 @@ describe('Testing /api/jots/[id] api handler', () => {
         )
     });
 
+    it('if migrate is true, returns a 200 status if jot is successfully migrated', async () => {
+        const { req, res } = mockRequestResponse("PATCH", {}, {id: "id", migrate: "true"});
+
+        const date = new Date()
+
+        prismaMock.dailyList.update.mockResolvedValue({
+            id: 'listId',
+            date: date
+        });
+
+        await handler(req, res);
+
+        expect(res.statusCode).toBe(200);
+        expect(res._getJSONData()).toEqual(
+            expect.objectContaining({
+                id: 'listId',
+                date: date.toISOString()
+            })
+        );
+    })
+    
     it('returns a 500 status if there is an error', async () => {
-        const { req ,res } = mockRequestResponse('PATCH', jot, "id");
+        const { req ,res } = mockRequestResponse('PATCH', jot, {id: "id"});
 
         prismaMock.jot.update.mockRejectedValueOnce(new Error('Database Error'));
 

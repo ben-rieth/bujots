@@ -1,9 +1,24 @@
-import {render, screen } from '@testing-library/react';
+import {render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
+import { setupServer } from 'msw/node';
+import { rest } from 'msw';
 
 import JotListItem from 'components/JotListItem';
 import { Jot, Type, Status } from '@prisma/client';
+
+const server = setupServer(
+    rest.patch('/api/jots/id', (req, res, ctx) => {
+        return res(
+            ctx.status(200)
+        )
+    })
+);
+
+beforeAll(() => server.listen());
+
+afterAll(() => server.close());
+afterEach(() => server.resetHandlers())
 
 describe("Testing Jot Component", () => {
 
@@ -19,7 +34,7 @@ describe("Testing Jot Component", () => {
     }
 
     it('displays the text content of the jot', () => {
-        render(<JotListItem jot={testJot} isToday={true}/>);
+        render(<JotListItem jot={testJot} isToday={true} onMigrate={jest.fn()}/>);
 
         const content = screen.getByText('This is a jot');
 
@@ -29,7 +44,7 @@ describe("Testing Jot Component", () => {
     it('displays a dash if the jot is a NOTE', () => {
         testJot.type = Type.NOTE;
 
-        render(<JotListItem jot={testJot} isToday={true}/>);
+        render(<JotListItem jot={testJot} isToday={true} onMigrate={jest.fn()}/>);
 
         const icon = screen.getByTestId('dash');
         expect(icon).toBeInTheDocument();
@@ -39,7 +54,7 @@ describe("Testing Jot Component", () => {
     it('displays a triangle if the jot is an EVENT', () => {
         testJot.type = Type.EVENT;
 
-        render(<JotListItem jot={testJot} isToday={true}/>)
+        render(<JotListItem jot={testJot} isToday={true} onMigrate={jest.fn()}/>)
 
         const icon = screen.getByTestId('triangle-outline');
         expect(icon).toBeInTheDocument();
@@ -48,7 +63,7 @@ describe("Testing Jot Component", () => {
     it('displays a circle if the jot is a TASK', () => {
         testJot.type = Type.TASK;
 
-        render(<JotListItem jot={testJot} isToday={true}/>)
+        render(<JotListItem jot={testJot} isToday={true} onMigrate={jest.fn()}/>)
 
         const icon = screen.getByTestId('circle-outline');
         expect(icon).toBeInTheDocument();
@@ -57,7 +72,7 @@ describe("Testing Jot Component", () => {
     it('display the edit form when clicked on', async () => {
         const user = userEvent.setup();
 
-        render(<JotListItem jot={testJot} isToday={true}/>)
+        render(<JotListItem jot={testJot} isToday={true} onMigrate={jest.fn()}/>)
 
         const content = screen.getByTestId('content');
 
@@ -72,7 +87,7 @@ describe("Testing Jot Component", () => {
         const user = userEvent.setup();
         testJot.type = Type.TASK;
 
-        render(<JotListItem jot={testJot} isToday={true}/>);
+        render(<JotListItem jot={testJot} isToday={true} onMigrate={jest.fn()}/>);
 
         const taskIcon = screen.getByTestId('circle-outline');
         expect(taskIcon).toBeInTheDocument();
@@ -82,11 +97,11 @@ describe("Testing Jot Component", () => {
 
     });
 
-    it.skip('does not let user complete item if date is not today', async () => {
+    it('does not let user complete item if date is not today', async () => {
         const user = userEvent.setup();
         testJot.type = Type.TASK;
 
-        render(<JotListItem jot={testJot} isToday={false} />)
+        render(<JotListItem jot={testJot} isToday={false} onMigrate={jest.fn()}/>)
 
         const taskIcon = screen.getByTestId('circle-outline');
         expect(taskIcon).toBeInTheDocument();
@@ -100,16 +115,47 @@ describe("Testing Jot Component", () => {
         expect(filledIcon).not.toBeInTheDocument();
     });
 
-    it.skip('does not open edit form if date is not today', async () => {
+    it('does not open edit form if date is not today', async () => {
         const user = userEvent.setup();
         testJot.type = Type.TASK;
 
-        render(<JotListItem jot={testJot} isToday={false} />)
+        render(<JotListItem jot={testJot} isToday={false} onMigrate={jest.fn()}/>)
 
         const content = screen.getByTestId('content');
 
         await user.click(content);
 
         expect(screen.queryByRole('form')).not.toBeInTheDocument()
+    });
+
+    it('clicking on migrate arrow calls the onMigrate Fn', async () => {
+
+        const user = userEvent.setup()
+        const migrateFn = jest.fn()
+        render(<JotListItem jot={testJot} isToday={false} onMigrate={migrateFn}/>)
+
+        const arrow = screen.getByTestId('arrow');
+
+        await user.click(arrow);
+
+        expect(arrow).toBeInTheDocument();
+        expect(migrateFn).toHaveBeenCalled()
+    });
+
+    it("does not let user edit task after it is marked complete", async () => {
+        const user = userEvent.setup();
+        testJot.status = Status.COMPLETED;
+
+        render(<JotListItem jot={testJot} isToday={false} onMigrate={jest.fn()}/>);
+
+        const content = screen.getByTestId('content');
+
+        await user.click(content);
+
+        await waitFor(() => {
+            expect(screen.queryByRole('form')).not.toBeInTheDocument();
+        });
+        
+
     })
 })      
