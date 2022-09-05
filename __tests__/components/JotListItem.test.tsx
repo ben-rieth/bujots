@@ -157,5 +157,16 @@ describe("Testing Jot Component", () => {
         });
         
 
+    });
+
+    it("does not let user migrate notes", () => {
+        testJot.type = Type.NOTE;
+
+        const migrateFn = jest.fn()
+        render(<JotListItem jot={testJot} isToday={false} onMigrate={migrateFn} />);
+
+        expect(screen.queryByTestId('arrow')).not.toBeInTheDocument();
+        expect(migrateFn).not.toHaveBeenCalled();
+
     })
 })      
