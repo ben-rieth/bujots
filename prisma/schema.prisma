@@ -30,5 +30,5 @@ model Jot {
   important Boolean
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  date      DateTime @default(now())
+  date      DateTime @default(now()) @db.Date
 }

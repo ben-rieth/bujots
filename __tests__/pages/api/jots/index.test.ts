@@ -5,6 +5,7 @@ import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
 
 import handler from 'pages/api/jots/index';
 import { prisma } from 'lib/prisma';
+import { startOfToday, sub } from 'date-fns';
 
 jest.mock('lib/prisma', () => ({
     __esModule: true,
@@ -51,10 +52,11 @@ describe("Testing /api/jots handler", () => {
         },
     ];
 
-    const mockRequestResponse = (method: RequestMethod = 'POST', body: {} = {}) => {
+    const mockRequestResponse = (method: RequestMethod = 'POST', body: {} = {}, query: {} = {}) => {
         
         const { req, res }: { req: NextApiRequest, res: MockResponse<NextApiResponse>} = createMocks({ method });
         req.body = body;
+        req.query = query;
 
         return { req, res };
     }
@@ -139,7 +141,20 @@ describe("Testing /api/jots handler", () => {
                 ]
             )
         )
-    })
+    });
+
+    it('returns a 400 code if the daysAgo parameter is not a number', async () => {
+        const { req, res } = mockRequestResponse('GET', {}, { daysAgo: 'abc'});
+
+        await handler(req, res);
+
+        expect(res.statusCode).toBe(400);
+        expect(res._getJSONData()).toEqual(
+            expect.objectContaining({
+                message: "daysAgo parameter must be a number"
+            })
+        )
+    });
 
 
     it('returns a 500 code if there is a server error', async () => {

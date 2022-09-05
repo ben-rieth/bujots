@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "lib/prisma";
+import { startOfToday, sub } from "date-fns";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
@@ -32,10 +33,24 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 
     } else if (req.method === 'GET') {
-        
+
+        let daysAgo = req.query.daysAgo as string;
+
+        if(!daysAgo) daysAgo = "0"
+
+        if(isNaN(parseInt(daysAgo))) {
+            return res.status(400).json({
+                message: "daysAgo parameter must be a number"
+            })
+        }
+
+        const today = startOfToday();
+        const targetDay = sub(today, { days: Number(daysAgo)});
+
         try {
 
             const jots = await prisma.jot.findMany({
+                where: { date: targetDay },
                 orderBy: { createdAt: 'asc'}
             });
 
