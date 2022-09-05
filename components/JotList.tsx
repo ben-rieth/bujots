@@ -6,24 +6,27 @@ import DateHeader from "./DateHeader";
 import JotListItem from "./JotListItem";
 import JotForm from "./JotForm";
 import { IoAdd } from "react-icons/io5";
-import { isToday } from "date-fns";
+import { isToday, startOfToday, sub } from "date-fns";
+import JotSkeletonLoader from "./JotSkeletonLoader";
 
 type JotListProps = {
-    date: Date
+    daysAgo: number
 }
 
 const fetcher: Fetcher<Jot[], string> = ( url:string ) => axios.get(url).then(res => res.data);
 
-const JotList: FC<JotListProps> = ({ date}) => {
+const JotList: FC<JotListProps> = ({ daysAgo=0}) => {
+
+    const date = sub(startOfToday(), {days: daysAgo})
 
     const [newJotFormVisible, setNewJotFormVisible] = useState<boolean>(false);
 
-    const { data } = useSWR('/api/jots', fetcher);
-    const { mutate } = useSWRConfig(); 
+    const { data, error, mutate } = useSWR(`/api/jots?daysAgo=${daysAgo}`, fetcher);
+    const loading = !data && !error;
 
     const addJot = async (values: Partial<Jot>) => {
-        const newJot = await axios.post('/api/jots', values)
-        mutate('/api/jots', [...data!, newJot])
+        await axios.post('/api/jots', values)
+        mutate()
     }
 
     const closeForm = () => setNewJotFormVisible(false);
@@ -32,6 +35,15 @@ const JotList: FC<JotListProps> = ({ date}) => {
     return (
         <section data-testid="section">
             <DateHeader date={date}/>
+
+            {loading && 
+                <>
+                    <JotSkeletonLoader />
+                    <JotSkeletonLoader />
+                    <JotSkeletonLoader />
+                    <JotSkeletonLoader />
+                </>
+            }
 
             {data && data.map((jot: Jot) => {
                 return (
@@ -46,7 +58,7 @@ const JotList: FC<JotListProps> = ({ date}) => {
                 <JotForm onSubmit={addJot} done={closeForm} />
             )} 
 
-            {!newJotFormVisible && isToday(date) && (
+            {(!newJotFormVisible && isToday(date) && !loading) &&(
                 <button 
                     className="flex items-center"
                     onClick={openForm}

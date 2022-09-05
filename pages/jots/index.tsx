@@ -1,12 +1,19 @@
 import JotList from "components/JotList";
+import { useState } from "react";
 
 const JotPage = () => {
 
+    const [days, setDays] = useState<number>(1);
+    const lists = [];
+
+    for(let i = 0; i < days; i++) {
+        lists.push(<JotList daysAgo={i} key={`list-${i}`}/>)
+    }
+
     return (
         <main className="px-3">
-            <JotList date={new Date()}/>
-                    
-        
+            <button onClick={() => setDays(days + 1)}>Add Day</button>
+            {lists}
         </main>
         
     )
