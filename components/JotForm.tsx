@@ -132,7 +132,7 @@ const JotForm:FC<JotFormProps> = ({ initialValues=undefined, onSubmit, done = ()
                 {({ values, setFieldValue, handleSubmit, dirty }) => (
                     <Form 
                         ref={formikRef}
-                        name="new-jot-form"
+                        name="jot-form"
                         className="flex flex-col gap-1"
                         onKeyDown={(event: KeyboardEvent) => {
                             if (event.key === 'Enter') {

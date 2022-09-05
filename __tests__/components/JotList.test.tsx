@@ -41,7 +41,7 @@ describe("Testing JotList Component", () => {
     it("reveals JotForm when Add Jot is clicked", async () => {
         const user = userEvent.setup();
         
-        render(<JotList date={new Date()}/>);
+        render(<JotList daysAgo={0}/>);
 
         const addBtn = screen.getByTestId('add')
         expect(addBtn).toBeInTheDocument();

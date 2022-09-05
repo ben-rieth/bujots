@@ -6,17 +6,29 @@ import { useSWRConfig } from "swr";
 import JotForm from "./JotForm";
 
 type JotListItemProps = {
-    jot: Jot
+    jot: Jot,
+    isToday: boolean
 }
 
-const JotListItem : FC<JotListItemProps> = ({jot}) => {
+const JotListItem : FC<JotListItemProps> = ({jot, isToday }) => {
     const { mutate } = useSWRConfig();
 
     const [formVisible, setFormVisible] = useState<boolean>(false);
     const [internalJot, setInternalJot] = useState<Jot>(jot);
     const [complete, setComplete] = useState<boolean>(jot.status === Status.COMPLETED);
 
-    const openForm = () => setFormVisible(true);
+    const handleTextClick = () => {
+        if (isToday) {
+            setFormVisible(true);
+        }
+    }
+
+    const handleIconClick = () => {
+        if(isToday) {
+            toggleComplete()
+        }
+    }
+
     const closeForm = () => setFormVisible(false);
 
     const updateJot = async (values: Partial<Jot>) => {
@@ -52,28 +64,28 @@ const JotListItem : FC<JotListItemProps> = ({jot}) => {
             icon = <IoTriangleOutline 
                         data-testid="triangle-outline" 
                         className="w-6 h-6"
-                        onClick={toggleComplete}
+                        onClick={handleIconClick}
                     />;
 
         } else if (jot.type === Type.EVENT && complete) {
             icon = <IoTriangle 
                         data-testid="triangle-filled" 
                         className="w-6 h-6"
-                        onClick={toggleComplete}
+                        onClick={handleIconClick}
                     />;
 
         } else if (jot.type === Type.TASK && !complete) {
             icon = <IoEllipseOutline 
                         data-testid="circle-outline" 
                         className="w-6 h-6"
-                        onClick={toggleComplete}
+                        onClick={handleIconClick}
                     />;
 
         } else if (jot.type === Type.TASK && complete) {
             icon = <IoEllipse 
                         data-testid="circle-filled" 
                         className="w-6 h-6"
-                        onClick={toggleComplete}
+                        onClick={handleIconClick}
                     />;
         }
 
@@ -92,7 +104,7 @@ const JotListItem : FC<JotListItemProps> = ({jot}) => {
                         ${(internalJot.important && internalJot.status !== "DELETED") 
                             && "underline decoration-rose-500 underline-offset-2 decoration-2 font-bold"}
                     `}
-                    onClick={openForm}
+                    onClick={handleTextClick}
                     data-testid="content"
                 >
                     {internalJot.content}

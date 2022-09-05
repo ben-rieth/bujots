@@ -1,4 +1,4 @@
-import {render, screen, waitFor } from '@testing-library/react';
+import {render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 
@@ -15,11 +15,11 @@ describe("Testing Jot Component", () => {
         important: false,
         createdAt: new Date(),
         updatedAt: new Date(),
-        date: new Date()
+        listId: 'listId'
     }
 
     it('displays the text content of the jot', () => {
-        render(<JotListItem jot={testJot} />);
+        render(<JotListItem jot={testJot} isToday={true}/>);
 
         const content = screen.getByText('This is a jot');
 
@@ -29,7 +29,7 @@ describe("Testing Jot Component", () => {
     it('displays a dash if the jot is a NOTE', () => {
         testJot.type = Type.NOTE;
 
-        render(<JotListItem jot={testJot} />);
+        render(<JotListItem jot={testJot} isToday={true}/>);
 
         const icon = screen.getByTestId('dash');
         expect(icon).toBeInTheDocument();
@@ -39,7 +39,7 @@ describe("Testing Jot Component", () => {
     it('displays a triangle if the jot is an EVENT', () => {
         testJot.type = Type.EVENT;
 
-        render(<JotListItem jot={testJot} />)
+        render(<JotListItem jot={testJot} isToday={true}/>)
 
         const icon = screen.getByTestId('triangle-outline');
         expect(icon).toBeInTheDocument();
@@ -48,7 +48,7 @@ describe("Testing Jot Component", () => {
     it('displays a circle if the jot is a TASK', () => {
         testJot.type = Type.TASK;
 
-        render(<JotListItem jot={testJot} />)
+        render(<JotListItem jot={testJot} isToday={true}/>)
 
         const icon = screen.getByTestId('circle-outline');
         expect(icon).toBeInTheDocument();
@@ -57,7 +57,7 @@ describe("Testing Jot Component", () => {
     it('display the edit form when clicked on', async () => {
         const user = userEvent.setup();
 
-        render(<JotListItem jot={testJot} />)
+        render(<JotListItem jot={testJot} isToday={true}/>)
 
         const content = screen.getByTestId('content');
 
@@ -72,7 +72,7 @@ describe("Testing Jot Component", () => {
         const user = userEvent.setup();
         testJot.type = Type.TASK;
 
-        render(<JotListItem jot={testJot} />);
+        render(<JotListItem jot={testJot} isToday={true}/>);
 
         const taskIcon = screen.getByTestId('circle-outline');
         expect(taskIcon).toBeInTheDocument();
@@ -80,5 +80,36 @@ describe("Testing Jot Component", () => {
         await user.click(taskIcon);
         await screen.findByTestId('circle-filled')
 
+    });
+
+    it.skip('does not let user complete item if date is not today', async () => {
+        const user = userEvent.setup();
+        testJot.type = Type.TASK;
+
+        render(<JotListItem jot={testJot} isToday={false} />)
+
+        const taskIcon = screen.getByTestId('circle-outline');
+        expect(taskIcon).toBeInTheDocument();
+
+        await user.click(taskIcon);
+
+        expect(taskIcon).toBeInTheDocument();
+
+        const filledIcon = screen.queryByTestId('circle-filled');
+
+        expect(filledIcon).not.toBeInTheDocument();
+    });
+
+    it.skip('does not open edit form if date is not today', async () => {
+        const user = userEvent.setup();
+        testJot.type = Type.TASK;
+
+        render(<JotListItem jot={testJot} isToday={false} />)
+
+        const content = screen.getByTestId('content');
+
+        await user.click(content);
+
+        expect(screen.queryByRole('form')).not.toBeInTheDocument()
     })
 })      

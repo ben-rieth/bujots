@@ -9,13 +9,12 @@ import { IoAdd } from "react-icons/io5";
 import { isToday, startOfToday, sub } from "date-fns";
 
 type JotListProps = {
-    date?: Date
-    daysAgo?: number
+    daysAgo: number
 }
 
 const fetcher: Fetcher<(DailyList & { jots: Jot[]}), string> = ( url:string ) => axios.get(url).then(res => res.data);
 
-const JotList: FC<JotListProps> = ({ date=new Date(), daysAgo=0 }) => {
+const JotList: FC<JotListProps> = ({ daysAgo }) => {
 
     const today = startOfToday();
     const listDate = sub(today, { days: daysAgo});
@@ -54,7 +53,7 @@ const JotList: FC<JotListProps> = ({ date=new Date(), daysAgo=0 }) => {
             {jots && jots.map((jot: Jot) => {
                 return (
                     <div key={jot.id}>
-                        <JotListItem jot={jot} />
+                        <JotListItem jot={jot} isToday={isToday(listDate)} />
                         <hr />
                     </div>
                 )     
