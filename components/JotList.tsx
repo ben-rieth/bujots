@@ -1,4 +1,4 @@
-import { Jot } from "@prisma/client";
+import { Jot, Status, Type } from "@prisma/client";
 import { FC, useState } from "react";
 import useSWR, { Fetcher, useSWRConfig } from "swr";
 import axios from 'axios';
@@ -25,8 +25,25 @@ const JotList: FC<JotListProps> = ({ daysAgo=0}) => {
     const loading = !data && !error;
 
     const addJot = async (values: Partial<Jot>) => {
-        await axios.post('/api/jots', values)
-        mutate()
+        
+        const tempJot : Jot = {
+            important: values.important!,
+            status: values.status!,
+            type: values.type!,
+            content: values.content!,
+            id: 'id',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            date: new Date()
+        }
+
+        mutate(
+            await axios.post('/api/jots', values),
+            {
+                optimisticData: [...data!, tempJot],
+                rollbackOnError: true
+            }
+        )
     }
 
     const closeForm = () => setNewJotFormVisible(false);
