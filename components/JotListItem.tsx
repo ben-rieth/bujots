@@ -8,7 +8,7 @@ import MigrateIcon from "./MigrateIcon";
 
 type JotListItemProps = {
     jot: Jot,
-    isToday?: boolean
+    isToday: boolean
 }
 
 const JotListItem : FC<JotListItemProps> = ({jot, isToday=false }) => {
@@ -19,7 +19,12 @@ const JotListItem : FC<JotListItemProps> = ({jot, isToday=false }) => {
 
     const [migrated, setMigrated] = useState<boolean>(false);
 
-    const openForm = () => setFormVisible(true);
+    const openForm = () => {
+        if(isToday) {
+            setFormVisible(true)
+        }
+    };
+
     const closeForm = () => setFormVisible(false);
 
     const updateJot = async (values: Partial<Jot>) => {
@@ -36,6 +41,7 @@ const JotListItem : FC<JotListItemProps> = ({jot, isToday=false }) => {
     }
 
     const toggleComplete = async () => {
+        if(!isToday) return
         if (internalJot.status === Status.DELETED) return;
 
         const newStatus = internalJot.status === Status.COMPLETED ? Status.ACTIVE : Status.COMPLETED;

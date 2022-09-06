@@ -4,6 +4,21 @@ import userEvent from '@testing-library/user-event';
 
 import JotListItem from 'components/JotListItem';
 import { Jot, Type, Status } from '@prisma/client';
+import { rest } from 'msw';
+import { setupServer } from 'msw/node';
+
+const server = setupServer(
+    rest.patch('/api/jots/id', (req, res, ctx) => {
+        return res(
+            ctx.status(200)
+        )
+    })
+);
+
+beforeAll(() => server.listen());
+
+afterAll(() => server.close());
+afterEach(() => server.resetHandlers())
 
 describe("Testing Jot Component", () => {
 
@@ -19,7 +34,7 @@ describe("Testing Jot Component", () => {
     }
 
     it('displays the text content of the jot', () => {
-        render(<JotListItem jot={testJot} />);
+        render(<JotListItem jot={testJot} isToday={true}/>);
 
         const content = screen.getByText('This is a jot');
 
@@ -29,7 +44,7 @@ describe("Testing Jot Component", () => {
     it('displays a dash if the jot is a NOTE', () => {
         testJot.type = Type.NOTE;
 
-        render(<JotListItem jot={testJot} />);
+        render(<JotListItem jot={testJot} isToday={true}/>);
 
         const icon = screen.getByTestId('dash');
         expect(icon).toBeInTheDocument();
@@ -39,7 +54,7 @@ describe("Testing Jot Component", () => {
     it('displays a triangle if the jot is an EVENT', () => {
         testJot.type = Type.EVENT;
 
-        render(<JotListItem jot={testJot} />)
+        render(<JotListItem jot={testJot} isToday={true}/>)
 
         const icon = screen.getByTestId('triangle-outline');
         expect(icon).toBeInTheDocument();
@@ -48,7 +63,7 @@ describe("Testing Jot Component", () => {
     it('displays a circle if the jot is a TASK', () => {
         testJot.type = Type.TASK;
 
-        render(<JotListItem jot={testJot} />)
+        render(<JotListItem jot={testJot} isToday={true}/>)
 
         const icon = screen.getByTestId('circle-outline');
         expect(icon).toBeInTheDocument();
@@ -57,7 +72,7 @@ describe("Testing Jot Component", () => {
     it('display the edit form when clicked on', async () => {
         const user = userEvent.setup();
 
-        render(<JotListItem jot={testJot} />)
+        render(<JotListItem jot={testJot} isToday={true}/>)
 
         const content = screen.getByTestId('content');
 
@@ -72,7 +87,7 @@ describe("Testing Jot Component", () => {
         const user = userEvent.setup();
         testJot.type = Type.TASK;
 
-        render(<JotListItem jot={testJot} />);
+        render(<JotListItem jot={testJot} isToday={true}/>);
 
         const taskIcon = screen.getByTestId('circle-outline');
         expect(taskIcon).toBeInTheDocument();
@@ -80,5 +95,30 @@ describe("Testing Jot Component", () => {
         await user.click(taskIcon);
         await screen.findByTestId('circle-filled')
 
+    });
+
+    it('does not let user open edit form if date is not today', async () => {
+        const user = userEvent.setup();
+
+        render(<JotListItem jot={testJot} isToday={false}/>);
+
+        const content = screen.getByTestId('content');
+        await user.click(content);
+
+        expect(screen.queryByRole('form')).not.toBeInTheDocument()
+    });
+
+    it('does not let user complete a task or event if date is not today', async () => {
+        const user = userEvent.setup();
+        testJot.type = "EVENT";
+        testJot.status = "ACTIVE";
+
+        render(<JotListItem jot={testJot} isToday={false}/>);
+
+        const eventIcon = screen.getByTestId('triangle-outline');
+        await user.click(eventIcon);
+
+        expect(eventIcon).toBeInTheDocument();
+        expect(screen.queryByTestId('triangle-filled')).not.toBeInTheDocument();
     })
 })      
