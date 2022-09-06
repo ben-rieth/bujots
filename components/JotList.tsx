@@ -22,7 +22,9 @@ const JotList: FC<JotListProps> = ({ daysAgo=0}) => {
     const [jots, setJots] = useState<Jot[]>([]);
     const [newJotFormVisible, setNewJotFormVisible] = useState<boolean>(false);
 
-    const { data, error, mutate } = useSWR(`/api/jots?daysAgo=${daysAgo}`, fetcher);
+    const swrOptions = daysAgo === 0 ? { refreshInterval: 1000 } : {};
+
+    const { data, error, mutate } = useSWR(`/api/jots?daysAgo=${daysAgo}`, fetcher, swrOptions);
     const loading = !data && !error;
 
     useEffect(() => {

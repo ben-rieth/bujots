@@ -1,10 +1,12 @@
 import { Jot, Status, Type } from "@prisma/client";
 import axios from "axios";
 import { isToday, parseISO } from "date-fns";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { IoEllipseOutline, IoTriangleOutline, IoRemove, IoTriangle, IoEllipse, IoArrowForwardCircle } from 'react-icons/io5';
 import { useSWRConfig } from "swr";
 import JotForm from "./JotForm";
+import MigrateIcon from "./MigrateIcon";
 
 type JotListItemProps = {
     jot: Jot,
@@ -14,11 +16,11 @@ type JotListItemProps = {
 const JotListItem : FC<JotListItemProps> = ({jot, isToday=false }) => {
     const { mutate } = useSWRConfig();
 
-    const showMigrateIcon = !isToday && jot.type !== "NOTE" && jot.status !== "DELETED";
-
     const [formVisible, setFormVisible] = useState<boolean>(false);
     const [internalJot, setInternalJot] = useState<Jot>(jot);
     const [complete, setComplete] = useState<boolean>(jot.status === Status.COMPLETED);
+
+    const [migrated, setMigrated] = useState<boolean>(false);
 
     const openForm = () => setFormVisible(true);
     const closeForm = () => setFormVisible(false);
@@ -35,6 +37,13 @@ const JotListItem : FC<JotListItemProps> = ({jot, isToday=false }) => {
             });
         mutate('/api/jots')
     }
+
+    // const migrateJot = async () => {
+    //     setLoadMigrate(true);
+    //     await axios.patch(`api/jots/${jot.id}?migrate=true`)
+    //     mutate('/api/jots');
+    //     setMigrated(true);
+    // }
 
     const toggleComplete = async () => {
         if (jot.status === Status.DELETED) return;
@@ -84,6 +93,10 @@ const JotListItem : FC<JotListItemProps> = ({jot, isToday=false }) => {
         return icon;
     }
 
+    if (migrated) {
+        return null;
+    }
+
     return (
         !formVisible ? (
             <article className="flex items-center gap-1 py-1" >
@@ -102,9 +115,11 @@ const JotListItem : FC<JotListItemProps> = ({jot, isToday=false }) => {
                     {internalJot.content}
                 </span>
 
-                {showMigrateIcon &&
-                    <IoArrowForwardCircle className="w-6 h-6 fill-sky-500"/>
-                }
+
+                <MigrateIcon 
+                    jot={internalJot} 
+                    isToday={isToday}
+                    onMigrate={() => setMigrated(true)} />
             </article>
         ) : (
             <JotForm 
