@@ -13,7 +13,6 @@ type MigrateIconProps = {
 
 const MigrateIcon : FC<MigrateIconProps> = ({ jot, isToday, onMigrate }) => {
 
-    console.log('render')
     const { mutate } = useSWRConfig();
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
