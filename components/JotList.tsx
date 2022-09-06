@@ -1,5 +1,5 @@
 import { Jot, Status, Type } from "@prisma/client";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import useSWR, { Fetcher, useSWRConfig } from "swr";
 import axios from 'axios';
 import DateHeader from "./DateHeader";
@@ -19,10 +19,17 @@ const JotList: FC<JotListProps> = ({ daysAgo=0}) => {
 
     const date = sub(startOfToday(), {days: daysAgo})
 
+    const [jots, setJots] = useState<Jot[]>([]);
     const [newJotFormVisible, setNewJotFormVisible] = useState<boolean>(false);
 
     const { data, error, mutate } = useSWR(`/api/jots?daysAgo=${daysAgo}`, fetcher);
     const loading = !data && !error;
+
+    useEffect(() => {
+        if(data) {
+            setJots(data)
+        }
+    }, [data]);
 
     const addJot = async (values: Partial<Jot>) => {
         
@@ -37,13 +44,10 @@ const JotList: FC<JotListProps> = ({ daysAgo=0}) => {
             date: new Date()
         }
 
-        mutate(
-            await axios.post('/api/jots', values),
-            {
-                optimisticData: [...data!, tempJot],
-                rollbackOnError: true
-            }
-        )
+        setJots([...jots, tempJot]);
+
+        await axios.post('/api/jots', values).then(res => res.data);
+        mutate()
     }
 
     const closeForm = () => setNewJotFormVisible(false);
@@ -62,7 +66,7 @@ const JotList: FC<JotListProps> = ({ daysAgo=0}) => {
                 </>
             }
 
-            {data && data.map((jot: Jot) => {
+            {data && Array.isArray(data) && data.map((jot: Jot) => {
                 return (
                     <div key={jot.id}>
                         <JotListItem jot={jot} />

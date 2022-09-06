@@ -9,7 +9,7 @@ type JotListItemProps = {
     jot: Jot
 }
 
-const JotListItem : FC<JotListItemProps> = ({jot}) => {
+const JotListItem : FC<JotListItemProps> = ({jot }) => {
     const { mutate } = useSWRConfig();
 
     const [formVisible, setFormVisible] = useState<boolean>(false);
@@ -20,6 +20,7 @@ const JotListItem : FC<JotListItemProps> = ({jot}) => {
     const closeForm = () => setFormVisible(false);
 
     const updateJot = async (values: Partial<Jot>) => {
+
         const oldJotValues = internalJot;
         setInternalJot({...internalJot, ...values});
         closeForm();
