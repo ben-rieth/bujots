@@ -23,7 +23,6 @@ const JotListItem : FC<JotListItemProps> = ({jot }) => {
 
         const oldJotValues = internalJot;
         setInternalJot({...internalJot, ...values});
-        closeForm();
         
         await axios.patch(`/api/jots/${jot.id}`, values)
             .catch((error) => {
@@ -104,10 +103,10 @@ const JotListItem : FC<JotListItemProps> = ({jot }) => {
                 onSubmit={updateJot}
                 done={closeForm}
                 initialValues={{
-                    content: jot.content,
-                    status: jot.status,
-                    important: jot.important,
-                    type: jot.type
+                    content: internalJot.content,
+                    status: internalJot.status,
+                    important: internalJot.important,
+                    type: internalJot.type
                 }}
             />
         )
