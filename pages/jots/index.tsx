@@ -3,7 +3,7 @@ import { useState } from "react";
 
 const JotPage = () => {
 
-    const [days, setDays] = useState<number>(1);
+    const [days, setDays] = useState<number>(2);
     const lists = [];
 
     for(let i = 0; i < days; i++) {
