@@ -69,7 +69,7 @@ const JotList: FC<JotListProps> = ({ daysAgo=0}) => {
             {data && Array.isArray(data) && data.map((jot: Jot) => {
                 return (
                     <div key={jot.id}>
-                        <JotListItem jot={jot} />
+                        <JotListItem jot={jot} isToday={daysAgo === 0}/>
                         <hr />
                     </div>
                 )     

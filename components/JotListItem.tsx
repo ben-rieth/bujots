@@ -1,16 +1,20 @@
 import { Jot, Status, Type } from "@prisma/client";
 import axios from "axios";
+import { isToday, parseISO } from "date-fns";
 import { FC, useState } from "react";
-import { IoEllipseOutline, IoTriangleOutline, IoRemove, IoTriangle, IoEllipse } from 'react-icons/io5';
+import { IoEllipseOutline, IoTriangleOutline, IoRemove, IoTriangle, IoEllipse, IoArrowForwardCircle } from 'react-icons/io5';
 import { useSWRConfig } from "swr";
 import JotForm from "./JotForm";
 
 type JotListItemProps = {
-    jot: Jot
+    jot: Jot,
+    isToday?: boolean
 }
 
-const JotListItem : FC<JotListItemProps> = ({jot }) => {
+const JotListItem : FC<JotListItemProps> = ({jot, isToday=false }) => {
     const { mutate } = useSWRConfig();
+
+    const showMigrateIcon = !isToday && jot.type !== "NOTE" && jot.status !== "DELETED";
 
     const [formVisible, setFormVisible] = useState<boolean>(false);
     const [internalJot, setInternalJot] = useState<Jot>(jot);
@@ -97,6 +101,10 @@ const JotListItem : FC<JotListItemProps> = ({jot }) => {
                 >
                     {internalJot.content}
                 </span>
+
+                {showMigrateIcon &&
+                    <IoArrowForwardCircle className="w-6 h-6 fill-sky-500"/>
+                }
             </article>
         ) : (
             <JotForm 

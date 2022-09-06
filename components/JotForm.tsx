@@ -184,7 +184,7 @@ const JotForm:FC<JotFormProps> = ({ initialValues=undefined, onSubmit, done = ()
                                 </label>
                             )}
                         </div>
-                        {values.status !== "DELETED" &&
+                        {(values.status !== "DELETED" && initialValues?.status !== "DELETED") &&
                             <TypeRadioGroup disabled={disabled} values={values} />
                         }
                         
