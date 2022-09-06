@@ -1,13 +1,12 @@
-import { Form, Formik, FormikValues, Field, useFormikContext, FormikProps } from "formik";
+import { Form, Formik, FormikValues, Field, useFormikContext } from "formik";
 import * as Yup from 'yup';
 import { FC, forwardRef, KeyboardEvent, RefObject, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { IoEllipseOutline, IoRemove, IoTriangleOutline, IoArrowUndoCircle } from "react-icons/io5";
+import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { RiDeleteBinLine } from "react-icons/ri";
 import { BsExclamationCircleFill } from 'react-icons/bs';
-import { Status, Type } from "@prisma/client";
 import useDetectOutsideClick from "hooks/useDetectOutsideClick";
-import { doesNotMatch } from "assert";
 import RadioButton from "./RadioButton";
 
 type JotFormProps = {
@@ -130,11 +129,11 @@ const JotForm:FC<JotFormProps> = ({ initialValues=undefined, onSubmit, done = ()
                     status: Yup.string()
                 })}
             >
-                {({ values, setFieldValue, handleSubmit, dirty }) => (
+                {({ values, setFieldValue, handleSubmit, dirty, isSubmitting }) => (
                     <Form 
                         ref={formikRef}
                         name="new-jot-form"
-                        className="flex flex-col gap-2"
+                        className="relative flex flex-col gap-2"
                         onKeyDown={(event: KeyboardEvent) => {
                             if (event.key === 'Enter') {
                                 dirty ? handleSubmit() : done()
@@ -188,6 +187,13 @@ const JotForm:FC<JotFormProps> = ({ initialValues=undefined, onSubmit, done = ()
                         {values.status !== "DELETED" &&
                             <TypeRadioGroup disabled={disabled} values={values} />
                         }
+                        
+                        {isSubmitting && 
+                            <div className="absolute top-0 left-0 flex items-center justify-center w-full h-full backdrop-blur-3xl">
+                                <AiOutlineLoading3Quarters className="w-8 h-8 fill-sky-500 animate-spin"/>
+                            </div>
+                        }
+                        
                         <OutsideClickSubmit ref={formikRef} done={done} />
                     </Form>
                 )}
