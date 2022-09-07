@@ -3,7 +3,7 @@ import { useState } from "react";
 
 const JotPage = () => {
 
-    const [days, setDays] = useState<number>(2);
+    const [days, setDays] = useState<number>(7);
     const lists = [];
 
     for(let i = 0; i < days; i++) {
@@ -12,7 +12,7 @@ const JotPage = () => {
 
     return (
         <main className="px-3">
-            <button onClick={() => setDays(days + 1)}>Add Day</button>
+            <button onClick={() => setDays(days + 7)}>Add Day</button>
             {lists}
         </main>
         

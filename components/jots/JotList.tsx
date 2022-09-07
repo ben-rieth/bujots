@@ -55,8 +55,12 @@ const JotList: FC<JotListProps> = ({ daysAgo=0}) => {
     const closeForm = () => setNewJotFormVisible(false);
     const openForm = () => setNewJotFormVisible(true)
 
+    if (loading || jots.length === 0) {
+        return null;
+    }
+
     return (
-        <section data-testid="section">
+        <section data-testid="section" className="mb-3">
             <DateHeader date={date}/>
 
             {loading && 
