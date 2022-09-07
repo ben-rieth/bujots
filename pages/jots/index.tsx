@@ -1,11 +1,9 @@
 
 import JotList from "components/jots/JotList";
-import {  Fragment, RefObject, useCallback, useEffect, useRef, useState } from "react";
-import { BsWindowSidebar } from "react-icons/bs";
+import { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 const JotPage = () => {
-
 
     const [days, setDays] = useState<number>(7);
     const lists = [];
@@ -15,7 +13,6 @@ const JotPage = () => {
     }
 
     const loadMoreHandler = () => {
-        console.log('More')
         setDays(days + 7)
     }
 
