@@ -1,9 +1,11 @@
+
 import JotList from "components/jots/JotList";
-import { RefObject, UIEvent, useCallback, useEffect, useRef, useState } from "react";
+import {  Fragment, RefObject, useCallback, useEffect, useRef, useState } from "react";
+import { BsWindowSidebar } from "react-icons/bs";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const JotPage = () => {
 
-    const ref = useRef<HTMLElement>();
 
     const [days, setDays] = useState<number>(7);
     const lists = [];
@@ -12,23 +14,20 @@ const JotPage = () => {
         lists.push(<JotList daysAgo={i} key={`list-${i}`}/>)
     }
 
-    const handleScroll = useCallback( () => {
-        console.log("scroll");
-    }, []);
-
-    useEffect(() => {
-        const div = ref.current;
-        div?.addEventListener('scroll', handleScroll)
-
-        return div?.removeEventListener('scroll', handleScroll);
-
-    }, [handleScroll])
+    const loadMoreHandler = () => {
+        console.log('More')
+        setDays(days + 7)
+    }
 
     return (
-        <main className="px-3" ref={ref as RefObject<HTMLElement>}>
-            <button onClick={() => setDays(days + 7)}>Add Day</button>
+        <InfiniteScroll
+            next={loadMoreHandler}
+            loader={<h3>Loading</h3>}
+            hasMore={days < 16}
+            dataLength={lists.length}
+        >
             {lists}
-        </main>
+        </InfiniteScroll>
         
     )
 }

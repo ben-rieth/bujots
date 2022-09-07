@@ -1,7 +1,8 @@
 import { Type } from '@prisma/client';
 import { startOfToday, sub } from 'date-fns';
 import { PrismaClient } from '@prisma/client';
-import { prisma } from 'lib/prisma'
+
+const prisma = new PrismaClient();
 
 type JotInputs = {
     content: string
