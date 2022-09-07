@@ -21,6 +21,9 @@ const generateJots = () => {
     
 
     for(let i = 2; i < 16; i++ ) {
+
+        if (i === 4 || i === 5 || i === 12) continue;
+
         days.set(`${i}daysAgo`, sub(today, { days: i}));
     }
 
