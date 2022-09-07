@@ -5,7 +5,7 @@ import { format, startOfToday, startOfYesterday } from 'date-fns';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 
-import JotList from 'components/JotList';
+import JotList from 'components/jots/JotList';
 import { returnedJots } from 'mock/FakeJots';
 
 const server = setupServer(

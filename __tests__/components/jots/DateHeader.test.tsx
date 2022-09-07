@@ -1,7 +1,7 @@
 import {render, screen} from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import DateHeader from 'components/DateHeader';
+import DateHeader from 'components/jots/DateHeader';
 
 describe('Testing DateHeader Component', () => {
     it('renders the current date with no props', () => {

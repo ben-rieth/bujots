@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 
-import JotForm from 'components/JotForm';
+import JotForm from 'components/jots/JotForm';
 import { Status } from '@prisma/client';
 
 const initialValues = {

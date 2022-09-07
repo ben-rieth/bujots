@@ -2,7 +2,7 @@ import {render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 
-import JotListItem from 'components/JotListItem';
+import JotListItem from 'components/jots/JotListItem';
 import { Jot, Type, Status } from '@prisma/client';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';

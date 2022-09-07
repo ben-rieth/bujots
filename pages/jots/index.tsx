@@ -1,4 +1,4 @@
-import JotList from "components/JotList";
+import JotList from "components/jots/JotList";
 import { useState } from "react";
 
 const JotPage = () => {

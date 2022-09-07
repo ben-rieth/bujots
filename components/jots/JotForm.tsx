@@ -7,7 +7,7 @@ import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { RiDeleteBinLine } from "react-icons/ri";
 import { BsExclamationCircleFill } from 'react-icons/bs';
 import useDetectOutsideClick from "hooks/useDetectOutsideClick";
-import RadioButton from "./RadioButton";
+import RadioButton from "../RadioButton";
 
 type JotFormProps = {
     onSubmit: (values: FormikValues) => Promise<void>
