@@ -4,35 +4,59 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+type JotInputs = {
+    content: string
+    important: boolean
+    type: Type
+    date: Date
+}
+
+const generateJots = () => {
+    const today = startOfToday()
+    const importantThreshold = .9;
+
+    const days = new Map();
+    days.set('today', today);
+    days.set('yesterday', sub(today, { days: 1}));
+    
+
+    for(let i = 2; i < 16; i++ ) {
+        days.set(`${i}daysAgo`, sub(today, { days: i}));
+    }
+
+    const jotTypes = new Map();
+    jotTypes.set('event 1', Type.EVENT);
+    jotTypes.set('event 2', Type.EVENT);
+    jotTypes.set('task', Type.TASK);
+    jotTypes.set('note', Type.NOTE);
+
+    let toCreate : JotInputs[] = [];
+
+    const importantChance = Math.random();
+    days.forEach((date: Date, dayText: string) => {
+        jotTypes.forEach((type: Type, typeText: string) => {
+
+            toCreate.push({
+                content: `${dayText} ${typeText}`,
+                important: importantChance > importantThreshold,
+                date: date,
+                type: type
+            })
+        })
+    });
+
+    return toCreate;
+}
+
 const main = async () => {
 
-    const today = startOfToday();
-    const yesterday = sub(today, { days: 1});
-    const twoDaysAgo = sub(today, { days: 2 });
-    const threeDaysAgo = sub(today, { days: 3 })
+    const jots = generateJots();
 
     await prisma.jot.deleteMany({})
 
     await prisma.jot.createMany({
-        data: [
-            { content: 'today event', date: today, important: false, type: Type.EVENT },
-            { content: 'today event 2', date: today, important: false, type: Type.EVENT },
-            { content: 'today task', date: today, important: false, type: Type.TASK },
-            { content: 'today note', date: today, important: false, type: Type.NOTE },
-            { content: 'yesterday event', date: yesterday, important: false, type: Type.EVENT },
-            { content: 'yesterday event 2', date: yesterday, important: false, type: Type.EVENT },
-            { content: 'yesterday task', date: yesterday, important: false, type: Type.TASK },
-            { content: 'yesterday note', date: yesterday, important: false, type: Type.NOTE },
-            { content: 'twoDaysAgo event', date: twoDaysAgo, important: false, type: Type.EVENT },
-            { content: 'twoDaysAgo event 2', date: twoDaysAgo, important: false, type: Type.EVENT },
-            { content: 'twoDaysAgo task', date: twoDaysAgo, important: false, type: Type.TASK },
-            { content: 'twoDaysAgo note', date: twoDaysAgo, important: false, type: Type.NOTE },
-            { content: 'threeDaysAgo event', date: threeDaysAgo, important: false, type: Type.EVENT },
-            { content: 'threeDaysAgo event 2', date: threeDaysAgo, important: false, type: Type.EVENT },
-            { content: 'threeDaysAgo task', date: threeDaysAgo, important: false, type: Type.TASK },
-            { content: 'threeDaysAgo note', date: threeDaysAgo, important: false, type: Type.NOTE },
-        ]
-    })
+        data: jots
+    });
 }
 
 main()
