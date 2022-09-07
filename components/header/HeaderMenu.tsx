@@ -7,7 +7,7 @@ const HeaderMenu = () => {
         <Menu as="div" className="relative">
             {({ open }) => (
                 <>
-                    <Menu.Button>
+                    <Menu.Button as="div">
                         <Burger opened={open}/>
                     </Menu.Button>
                     <Transition
