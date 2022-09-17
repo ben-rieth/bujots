@@ -3,13 +3,11 @@ import '@testing-library/jest-dom';
 import Home from '../pages/index';
 
 describe('Testing Home Component', () => {
-    it('renders a heading', () => {
+    it('renders auth form', () => {
         render(<Home />);
 
-        const heading = screen.getByRole('heading', {
-            name: /welcome to next\.js/i
-        });
+        const form = screen.getByRole('form');
 
-        expect(heading).toBeInTheDocument();
+        expect(form).toBeInTheDocument()
     })
 })
