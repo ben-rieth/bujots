@@ -4,6 +4,7 @@ import * as Yup from 'yup';
 import { signIn } from 'next-auth/react';
 import toast from "react-hot-toast";
 import AuthTabs from "./AuthTabs";
+import { FcGoogle } from 'react-icons/fc' 
 
 interface FormValues {
     email: string;
@@ -14,12 +15,8 @@ const AuthForm = () => {
     const [currentTab, setCurrentTab] = useState<"login" | "register">("register")
     const [disabled, setDisabled] = useState<boolean>(false);
 
-    const changeTab = () => {
-        if (currentTab === "login") {
-            setCurrentTab("register")
-        } else {
-            setCurrentTab("login");
-        }
+    const onTabChange = (index: number) => {
+        index === 0 ? setCurrentTab("register") : setCurrentTab("login")
     }
 
     const handleSubmit = async (values: FormikValues) => {
@@ -44,11 +41,12 @@ const AuthForm = () => {
         }
     }
 
+    const handleGoogleSignIn = async () => {
+
+    }
+
     return (
         <div className="flex flex-col items-center mt-5">
-            <h2 className="text-2xl font-bold text-sky-500">
-                Welcome to <span className="italic">BuJots</span>!
-            </h2>
             <Formik
                 initialValues={{ email: ''}}
                 onSubmit={handleSubmit}
@@ -59,10 +57,13 @@ const AuthForm = () => {
                 {({  }) => (
                     <>
                         <Form
-                            className="flex flex-col gap-5 mt-5"
+                            className="flex flex-col items-center gap-5 mt-5"
                             name="auth-form"
                         >
-                            <AuthTabs disabled={disabled} onTabChange={changeTab}/>
+                            <h2 className="text-2xl font-bold text-sky-500">
+                                Welcome to <span className="italic">BuJots</span>!
+                            </h2>
+                            <AuthTabs disabled={disabled} onTabChange={onTabChange}/>
 
                             <div className="relative flex flex-col">
                                 <label htmlFor="email" className="absolute px-1 bg-white left-2 -top-3">
@@ -86,14 +87,24 @@ const AuthForm = () => {
                             <button 
                                 disabled={disabled}
                                 type="submit"
-                                className="py-2 font-medium bg-white border-2 rounded-lg border-sky-500 text-sky-500 hover:text-white hover:bg-sky-500"
+                                className="w-64 py-2 font-medium bg-white border-2 rounded-lg border-sky-500 text-sky-500 hover:text-white hover:bg-sky-500"
                             >
                                 {currentTab === "register" ? "Sign Up" : "Sign In"}
+                            </button>
+                            <button 
+                                disabled={disabled}
+                                type="button"
+                                onClick={handleGoogleSignIn}
+                                className="flex items-center justify-center w-64 gap-2 py-2 border-2 rounded-lg text-sky-500 border-sky-500 hover:text-white hover:bg-sky-500"
+                            >
+                                <FcGoogle className="w-6 h-6"/>
+                                <p className="font-semibold">
+                                    {currentTab === "register" ? "Sign Up With Google" : "Sign In With Google"}
+                                </p>
                             </button>
                         </Form>
                     </>
                 )}
-                
             </Formik>
             
         </div>
