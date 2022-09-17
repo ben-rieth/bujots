@@ -3,6 +3,7 @@ import { useState } from "react";
 import * as Yup from 'yup';
 import { signIn } from 'next-auth/react';
 import toast from "react-hot-toast";
+import AuthTabs from "./AuthTabs";
 
 interface FormValues {
     email: string;
@@ -10,7 +11,16 @@ interface FormValues {
 
 const AuthForm = () => {
 
+    const [currentTab, setCurrentTab] = useState<"login" | "register">("register")
     const [disabled, setDisabled] = useState<boolean>(false);
+
+    const changeTab = () => {
+        if (currentTab === "login") {
+            setCurrentTab("register")
+        } else {
+            setCurrentTab("login");
+        }
+    }
 
     const handleSubmit = async (values: FormikValues) => {
         setDisabled(true);
@@ -52,6 +62,8 @@ const AuthForm = () => {
                             className="flex flex-col gap-5 mt-5"
                             name="auth-form"
                         >
+                            <AuthTabs disabled={disabled} onTabChange={changeTab}/>
+
                             <div className="relative flex flex-col">
                                 <label htmlFor="email" className="absolute px-1 bg-white left-2 -top-3">
                                     Email
@@ -76,7 +88,7 @@ const AuthForm = () => {
                                 type="submit"
                                 className="py-2 font-medium bg-white border-2 rounded-lg border-sky-500 text-sky-500 hover:text-white hover:bg-sky-500"
                             >
-                                Login
+                                {currentTab === "register" ? "Sign Up" : "Sign In"}
                             </button>
                         </Form>
                     </>
