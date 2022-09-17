@@ -19,5 +19,10 @@ export default NextAuth({
             from: process.env.EMAIL_FROM,
             maxAge: 10 * 60
         })
-    ]
+    ],
+    callbacks: {
+        async session({session}) {
+            return session;
+        }
+    },
 })

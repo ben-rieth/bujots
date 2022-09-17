@@ -1,6 +1,8 @@
 import { Formik, Field, Form, ErrorMessage, FormikValues } from "formik";
 import { useState } from "react";
 import * as Yup from 'yup';
+import { signIn } from 'next-auth/react';
+import toast from "react-hot-toast";
 
 interface FormValues {
     email: string;
@@ -10,34 +12,23 @@ const AuthForm = () => {
 
     const [disabled, setDisabled] = useState<boolean>(false);
 
-    const handleLogin = async (values: FormikValues) => {
-        // const email = values.email;
-        // const password = values.password;
-        
-        // const response = await axios.post(
-        //     '/api/auth/login',
-        //     { email, password }
-        // );
-
-        // return response;
-    }
-
     const handleSubmit = async (values: FormikValues) => {
         setDisabled(true);
 
+        const email = values.email
+        let toastId;
+
         try {
-            // const response = currentTab === "register" ?
-            //     await handleSignUp(values) :
-            //     await handleLogin(values);
+            toastId = toast.loading('Loading...');
 
-            // if (response.status === 200) {
-            //     return router.push('/jots');
-            // }
+            await signIn('email', {
+                email,
+                callbackUrl: '/jots'
+            })
 
-            // console.log(response.data);
-
+            toast.dismiss(toastId);
         } catch (err) {
-            console.log(err);
+            toast.error('Unable to sign in', { id: toastId })
         } finally {
             setDisabled(false);
         }

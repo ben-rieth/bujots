@@ -2,6 +2,7 @@ import Head from "next/head";
 import { FC } from "react";
 import HeaderMenu from "./header/HeaderMenu";
 import Logo from "./header/Logo";
+import { useSession } from 'next-auth/react';
 
 type LayoutProps = {
     children: JSX.Element
@@ -9,7 +10,8 @@ type LayoutProps = {
 
 const Layout : FC<LayoutProps> = ({ children }) => {
 
-    const user = false;
+    const { data: session, status} = useSession();
+    const user = session?.user;
 
     return (
         <>
@@ -24,7 +26,7 @@ const Layout : FC<LayoutProps> = ({ children }) => {
 
             <header className="flex items-center justify-between w-full h-12 px-2 shadow-md">
                 <Logo />
-                <HeaderMenu />
+                <HeaderMenu user={user}/>
             </header>
 
             <main className="container flex-grow mx-auto">
