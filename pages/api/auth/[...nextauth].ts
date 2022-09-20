@@ -24,5 +24,5 @@ export default NextAuth({
         async session({session}) {
             return session;
         }
-    },
+    }
 })
