@@ -25,5 +25,11 @@ export default NextAuth({
         async session({session}) {
             return session;
         }
-    }
+    },
+    pages: {
+        signIn: '/',
+        signOut: '/',
+        error: '/',
+        verifyRequest: '/'
+    },
 })

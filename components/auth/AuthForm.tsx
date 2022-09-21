@@ -5,6 +5,7 @@ import { signIn } from 'next-auth/react';
 import toast from "react-hot-toast";
 import AuthTabs from "./AuthTabs";
 import { FcGoogle } from 'react-icons/fc' 
+import Confirm from "./Confirm";
 
 interface FormValues {
     email: string;
@@ -14,6 +15,7 @@ const AuthForm = () => {
 
     const [currentTab, setCurrentTab] = useState<"login" | "register">("register")
     const [disabled, setDisabled] = useState<boolean>(false);
+    const [showConfirm, setShowConfirm] = useState<boolean>(false);
 
     const onTabChange = (index: number) => {
         index === 0 ? setCurrentTab("register") : setCurrentTab("login")
@@ -30,8 +32,11 @@ const AuthForm = () => {
 
             await signIn('email', {
                 email,
-                callbackUrl: '/jots'
-            })
+                callbackUrl: '/jots',
+                redirect: false
+            });
+
+            setShowConfirm(true);
 
             toast.dismiss(toastId);
         } catch (err) {
@@ -54,7 +59,7 @@ const AuthForm = () => {
                     email: Yup.string().email('Invalid email').required('Email Required')
                 })}
             >
-                {({  }) => (
+                {({ values }) => (
                     <>
                         <Form
                             className="flex flex-col items-center gap-5 mt-5"
@@ -102,6 +107,8 @@ const AuthForm = () => {
                                     {currentTab === "register" ? "Sign Up With Google" : "Sign In With Google"}
                                 </p>
                             </button>
+
+                            <Confirm show={showConfirm} email={values.email}/>
                         </Form>
                     </>
                 )}
