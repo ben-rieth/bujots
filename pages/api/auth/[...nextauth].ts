@@ -2,6 +2,7 @@ import NextAuth from 'next-auth';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { prisma } from 'lib/prisma';
 import EmailProvider from 'next-auth/providers/email';
+import GoogleProvider from 'next-auth/providers/google';
 import nodemailer from 'nodemailer';
 
 export default NextAuth({
@@ -19,6 +20,10 @@ export default NextAuth({
             },
             from: process.env.EMAIL_FROM,
             maxAge: 10 * 60
+        }),
+        GoogleProvider({
+            clientId: process.env.GOOGLE_ID!,
+            clientSecret: process.env.GOOGLE_SECRET!
         })
     ],
     callbacks: {
