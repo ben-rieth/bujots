@@ -1,8 +1,9 @@
 import { Menu, Transition } from '@headlessui/react';
-import { Burger } from '@mantine/core';
 import { User } from '@prisma/client';
 import { signOut } from 'next-auth/react';
 import { FC, Fragment } from 'react';
+
+import { FaUserCircle } from 'react-icons/fa';
 
 type HeaderMenuProps = {
     user: User | undefined
@@ -21,7 +22,7 @@ const HeaderMenu:FC<HeaderMenuProps> = ({ user }) => {
                 {({ open }) => (
                     <>
                         <Menu.Button as="div">
-                            <Burger opened={open}/>
+                            <FaUserCircle className="w-8 h-8 fill-sky-500"/>
                         </Menu.Button>
                         <Transition
                             as={Fragment}
