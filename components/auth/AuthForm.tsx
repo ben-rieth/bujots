@@ -47,7 +47,12 @@ const AuthForm = () => {
     }
 
     const handleGoogleSignIn = async () => {
+        toast.loading('Redirecting...');
+        setDisabled(true);
 
+        signIn('google', {
+            callbackUrl: '/jots'
+        })
     }
 
     return (
