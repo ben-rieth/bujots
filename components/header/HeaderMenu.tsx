@@ -4,6 +4,7 @@ import { signOut } from 'next-auth/react';
 import { FC, Fragment } from 'react';
 
 import { FaUserCircle } from 'react-icons/fa';
+import { BiChevronDown } from 'react-icons/bi';
 
 type HeaderMenuProps = {
     user: User | undefined
@@ -22,7 +23,10 @@ const HeaderMenu:FC<HeaderMenuProps> = ({ user }) => {
                 {({ open }) => (
                     <>
                         <Menu.Button as="div">
-                            <FaUserCircle className="w-8 h-8 fill-sky-500"/>
+                            <div className="flex items-center">
+                                <FaUserCircle className="w-8 h-8 fill-sky-500"/>
+                                <BiChevronDown className="w-5 h-5"/>
+                            </div>
                         </Menu.Button>
                         <Transition
                             as={Fragment}
