@@ -3,6 +3,7 @@ import { FC } from "react";
 import HeaderMenu from "./header/HeaderMenu";
 import Logo from "./header/Logo";
 import { useSession } from 'next-auth/react';
+import BottomNav from "./nav/BottomNav";
 
 type LayoutProps = {
     children: JSX.Element
@@ -32,6 +33,12 @@ const Layout : FC<LayoutProps> = ({ children }) => {
             <main className="container flex-grow mx-auto">
                 {children}
             </main>
+
+            {user && 
+                <footer className="fixed bottom-0 h-14 w-full shadow-md-top flex items-center jsutify-center">
+                    <BottomNav />
+                </footer>
+            }
         </>
     )
 }
