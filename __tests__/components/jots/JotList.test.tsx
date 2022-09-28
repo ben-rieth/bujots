@@ -1,4 +1,4 @@
-import {render, screen } from '@testing-library/react';
+import {render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { format, startOfToday, startOfYesterday } from 'date-fns';
@@ -29,7 +29,10 @@ describe("Testing JotList Component", () => {
 
         render(<JotList daysAgo={0} />);
 
-        expect(screen.getByRole('heading').textContent).toBe(today);
+        waitFor(() => {
+            expect(screen.getByRole('heading').textContent).toBe(today);
+        })
+        
     });
 
     it("reveals JotForm when Add Jot is clicked", async () => {
