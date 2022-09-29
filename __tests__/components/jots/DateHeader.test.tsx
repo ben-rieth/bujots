@@ -31,4 +31,14 @@ describe('Testing DateHeader Component', () => {
 
         expect(header.textContent).toBe("December 17, 1995")
     });
+
+    it('renders a left and right arrow', () => {
+        render(<DateHeader />);
+
+        const left = screen.getByTestId('left');
+        const right = screen.getByTestId('right');
+
+        expect(left).toBeInTheDocument();
+        expect(right).toBeInTheDocument();
+    })
 })
