@@ -2,6 +2,7 @@
 import { User } from "@prisma/client";
 import DailyList from "components/jots/DailyList";
 import JotList from "components/jots/JotList";
+import { startOfTomorrow } from "date-fns";
 import { GetServerSideProps } from "next";
 import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -15,7 +16,7 @@ type JotPageProps = {
 const JotPage:FC<JotPageProps> = ({ user }) => {
 
     return (
-        <DailyList />
+        <DailyList date={startOfTomorrow()}/>
     )
 
     // const [days, setDays] = useState<number>(7);
