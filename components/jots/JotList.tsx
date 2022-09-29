@@ -55,7 +55,7 @@ const JotList: FC<JotListProps> = ({ daysAgo=0}) => {
     const closeForm = () => setNewJotFormVisible(false);
     const openForm = () => setNewJotFormVisible(true)
 
-    if (loading || jots.length === 0) {
+    if (jots.length === 0) {
         return <section></section>
     }
 

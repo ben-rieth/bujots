@@ -1,18 +1,12 @@
 
 import JotList from "components/jots/JotList";
-import { useSession } from "next-auth/react";
+import { GetServerSideProps } from "next";
+import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 const JotPage = () => {
-
-    const router = useRouter();
-    const { status } = useSession();
-
-    if (status === "unauthenticated") {
-        router.push('/');
-    }
 
     const [days, setDays] = useState<number>(7);
     const lists = [];
@@ -38,20 +32,26 @@ const JotPage = () => {
     )
 }
 
-// export const getServerSideProps: GetServerSideProps = async (context) => {
-//     const session = await getSession(context);
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    const session = await getSession(context);
 
-//     if (!session) {
-//         return {
-//             redirect: {
-//                 destination: '/',
-//                 permanent: false
-//             }
-//         }
-//     }
+    if (!session) {
+        return {
+            redirect: {
+                destination: '/',
+                permanent: false
+            }
+        }
+    }
+
+    return {
+        props: {
+            user: session.user
+        }
+    }
 
 
 
-// }
+}
 
 export default JotPage;
