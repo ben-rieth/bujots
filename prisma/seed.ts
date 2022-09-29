@@ -35,10 +35,10 @@ const generateJots = () => {
 
     let toCreate : JotInputs[] = [];
 
-    const importantChance = Math.random();
+    let importantChance: number;
     days.forEach((date: Date, dayText: string) => {
         jotTypes.forEach((type: Type, typeText: string) => {
-
+            importantChance = Math.random();
             toCreate.push({
                 content: `${dayText} ${typeText}`,
                 important: importantChance > importantThreshold,

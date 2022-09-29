@@ -35,7 +35,7 @@ const Layout : FC<LayoutProps> = ({ children }) => {
             </main>
 
             {user && 
-                <footer className="fixed bottom-0 h-14 w-full shadow-md-top flex items-center jsutify-center">
+                <footer className="fixed bottom-0 h-14 w-full shadow-md-top flex items-center justify-center bg-white">
                     <BottomNav />
                 </footer>
             }
