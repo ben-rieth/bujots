@@ -1,35 +1,45 @@
 
+import { User } from "@prisma/client";
+import DailyList from "components/jots/DailyList";
 import JotList from "components/jots/JotList";
 import { GetServerSideProps } from "next";
 import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { FC, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 
-const JotPage = () => {
+type JotPageProps = {
+    user: User
+}
 
-    const [days, setDays] = useState<number>(7);
-    const lists = [];
-
-    for(let i = 0; i < days; i++) {
-        lists.push(<JotList daysAgo={i} key={`list-${i}`}/>)
-    }
-
-    const loadMoreHandler = () => {
-        setDays(days + 7)
-    }
+const JotPage:FC<JotPageProps> = ({ user }) => {
 
     return (
-        <InfiniteScroll
-            next={loadMoreHandler}
-            loader={<h3>Loading</h3>}
-            hasMore={days < 16}
-            dataLength={lists.length}
-        >
-            {lists}
-        </InfiniteScroll>
-        
+        <DailyList />
     )
+
+    // const [days, setDays] = useState<number>(7);
+    // const lists = [];
+
+    // for(let i = 0; i < days; i++) {
+    //     lists.push(<JotList daysAgo={i} key={`list-${i}`}/>)
+    // }
+
+    // const loadMoreHandler = () => {
+    //     setDays(days + 7)
+    // }
+
+    // return (
+    //     <InfiniteScroll
+    //         next={loadMoreHandler}
+    //         loader={<h3>Loading</h3>}
+    //         hasMore={days < 16}
+    //         dataLength={lists.length}
+    //     >
+    //         {lists}
+    //     </InfiniteScroll>
+        
+    // )
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
