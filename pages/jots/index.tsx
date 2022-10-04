@@ -18,43 +18,46 @@ type JotPageProps = {
 
 const JotPage:FC<JotPageProps> = ({ user }) => {
 
-    const [date, setDate] = useState<Date>(startOfToday());
-
-    return (
-        <div>
-            <DateHeader 
-                date={date} 
-                onBackClick={() => setDate(subDays(date, 1))}
-                onForwardClick={() => setDate(addDays(date, 1))}
-            />
-            <DailyList />
-            <JotInput />
-        </div>
-        
-    )
-
-    // const [days, setDays] = useState<number>(7);
-    // const lists = [];
-
-    // for(let i = 0; i < days; i++) {
-    //     lists.push(<JotList daysAgo={i} key={`list-${i}`}/>)
-    // }
-
-    // const loadMoreHandler = () => {
-    //     setDays(days + 7)
-    // }
+    // const [date, setDate] = useState<Date>(startOfToday());
 
     // return (
-    //     <InfiniteScroll
-    //         next={loadMoreHandler}
-    //         loader={<h3>Loading</h3>}
-    //         hasMore={days < 16}
-    //         dataLength={lists.length}
-    //     >
-    //         {lists}
-    //     </InfiniteScroll>
+    //     <div>
+    //         <DateHeader 
+    //             date={date} 
+    //             onBackClick={() => setDate(subDays(date, 1))}
+    //             onForwardClick={() => setDate(addDays(date, 1))}
+    //         />
+    //         <DailyList />
+    //         <JotInput />
+    //     </div>
         
     // )
+
+    const [days, setDays] = useState<number>(7);
+    const lists = [];
+
+    for(let i = 0; i < days; i++) {
+        lists.push(<JotList daysAgo={i} key={`list-${i}`}/>)
+    }
+
+    const loadMoreHandler = () => {
+        setDays(days + 7)
+    }
+
+    return (
+        <>
+            <InfiniteScroll
+                next={loadMoreHandler}
+                loader={<h3>Loading</h3>}
+                hasMore={days < 16}
+                dataLength={lists.length}
+            >
+                {lists}
+            </InfiniteScroll>
+            <JotInput />
+        </>
+        
+    )
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

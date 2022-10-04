@@ -25,17 +25,19 @@ const Layout : FC<LayoutProps> = ({ children }) => {
                 <link rel="icon" href="/favicon.io" />
             </Head>
 
-            <header className="flex items-center justify-between w-full h-12 px-2 shadow-md">
-                <Logo />
-                <HeaderMenu user={user}/>
+            <header className="fixed top-0 left-0 w-full bg-white">
+                <div className="flex items-center justify-between w-full h-12 px-2 shadow-md">
+                    <Logo />
+                    <HeaderMenu user={user}/>
+                </div>
             </header>
 
-            <main className="container flex-grow mx-auto">
+            <main className="container flex-grow mx-auto mt-12">
                 {children}
             </main>
 
             {user && 
-                <footer className="fixed bottom-0 h-14 w-full shadow-md-top flex items-center justify-center bg-white">
+                <footer className="fixed bottom-0 h-14 w-full flex items-center justify-center bg-white">
                     <BottomNav />
                 </footer>
             }
