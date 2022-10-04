@@ -7,20 +7,27 @@ import JotInput from 'components/jots/JotInput';
 import { startOfTomorrow } from 'date-fns';
 
 describe('Testing JotInput component', () => {
-    it('renders a text input box', () => {
+    it('renders a text input box and dropdown for type', () => {
         render(<JotInput />);
 
         const form = screen.getByRole('form');
         const input = screen.getByLabelText('New Jot');
-
+       
         expect(form).toBeInTheDocument();
         expect(form).toContainElement(input);
 
         expect(input).toBeInTheDocument();
+
+        
     });
 
-    it('renders a row of buttons when text input is focused', () => {
+    it('renders a row of buttons below text input', () => {
         render(<JotInput />);
+
+        const dropdown = screen.getByRole('combobox')
+
+        expect(dropdown).toBeInTheDocument();
+        expect(dropdown.childNodes.length).toBe(3);
 
         expect(screen.getByTestId('important')).toBeInTheDocument();
         expect(screen.getByTestId('calendar')).toBeInTheDocument();
@@ -51,5 +58,12 @@ describe('Testing JotInput component', () => {
             expect(screen.queryByTestId('date')).not.toBeInTheDocument();
         })
         
-    })
+    });
+
+    // it('allows user to change jot type by clicking on button', async () => {
+    //     const user = userEvent.setup();
+    //     render(<JotInput />);
+
+        
+    // });
 })

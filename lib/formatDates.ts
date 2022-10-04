@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 
 const displayFormat = (date: Date) => {
-    return format(date, "EEE, MMM d yyyy h:mm aa");
+    return format(date, "MM/dd/yy h:mmaa");
 }
 
 const inputFormat = (date: Date | undefined) => {
