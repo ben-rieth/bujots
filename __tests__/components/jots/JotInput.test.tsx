@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 
 import { inputFormat, displayFormat } from "lib/formatDates";
 import JotInput from 'components/jots/JotInput';
-import { startOfTomorrow } from 'date-fns';
+import { addDays, startOfTomorrow } from 'date-fns';
 
 describe('Testing JotInput component', () => {
     it('renders a text input box and dropdown for type', () => {
@@ -60,10 +60,19 @@ describe('Testing JotInput component', () => {
         
     });
 
-    // it('allows user to change jot type by clicking on button', async () => {
-    //     const user = userEvent.setup();
-    //     render(<JotInput />);
-
+    it('allows user to enter text for selected date', async () => {
+        const tomorrow = addDays(new Date(), 1);
         
-    // });
+        const user = userEvent.setup();
+        render(<JotInput />);
+
+        const input = screen.getByLabelText('New Jot');
+
+        await user.click(input);
+        await user.type(input, 'homework due tomorrow');
+
+        waitFor(() => {
+            expect(screen.getByTestId('date')).toHaveTextContent(displayFormat(tomorrow));
+        })
+    })
 })

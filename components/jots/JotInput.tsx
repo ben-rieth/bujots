@@ -1,24 +1,35 @@
 import { startOfToday } from "date-fns";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { BsExclamationSquareFill, BsFillCalendarEventFill } from 'react-icons/bs';
-import { IoEllipse, IoEllipseOutline, IoRemove, IoTriangle, IoTriangleOutline } from "react-icons/io5";
+import * as chrono from 'chrono-node';
 
 import { inputFormat, displayFormat } from "lib/formatDates";
+import { useDebouncedCallback } from "use-debounce";
 
 const JotInput = () => {
 
     const today = startOfToday();
 
-    const [selectedDate, setSelectedDate] = useState<Date | undefined>(today);
-    const [dateChanged, setDateChanged] = useState<boolean>(false);
+    const [text, setText] = useState<string>("");
+    const debounced = useDebouncedCallback(
+        (text) => {
+            const parsed = chrono.parseDate(text, new Date(), { forwardDate: true});
+            if (parsed !== null) {
+                setSelectedDate(parsed)
+            } else {
+                setSelectedDate(undefined);
+            }
+        },
+        500
+    )
+
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>();
     const [type, setType] = useState<string>("TASK");
 
     const dateChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
-        if (!dateChanged) setDateChanged(true);
 
         if (event.target.value === '' || event.target.value === undefined) {
             setSelectedDate(undefined);
-            setDateChanged(false);
         } else {
             setSelectedDate(new Date(event.target.value));
         }
@@ -32,14 +43,18 @@ const JotInput = () => {
         const formData = new FormData(form);
         const data = Object.fromEntries(formData);
 
-        if (!dateChanged) delete data.date;
+        if (!selectedDate === undefined) delete data.date;
 
         console.log(data);
     }
 
+    const textChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
+        setText(event.target.value);
+        debounced(event.target.value);
+    }
+
     return (
         <div className="fixed bottom-16 left-0 right-0 bg-white">
-            
             <form name="new-jot" onSubmit={submitHandler} className="flex flex-col px-3">
                 <div className="flex gap-2 items-center">
 
@@ -50,6 +65,8 @@ const JotInput = () => {
                             id="jot-text"
                             placeholder=" "
                             minLength={1}
+                            value={text}
+                            onChange={textChangeHandler}
                             className="border-b-2 border-slate-300  focus:border-sky-500 outline-none px-2 py-1 peer text-base w-full"
                         />
                         <label 
@@ -103,7 +120,7 @@ const JotInput = () => {
                             
                         </label>
                         
-                        {selectedDate && dateChanged && 
+                        {selectedDate && 
                             <>
                                 <p className="text-xs" data-testid="date">{displayFormat(selectedDate)}</p>
                             </>
