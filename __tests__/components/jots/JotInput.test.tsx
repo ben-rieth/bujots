@@ -73,6 +73,12 @@ describe('Testing JotInput component', () => {
 
         waitFor(() => {
             expect(screen.getByTestId('date')).toHaveTextContent(displayFormat(tomorrow));
+        });
+
+        await user.type(input, "[Backspace][Backspace][Backspace][Backspace][Backspace][Backspace][Backspace][Backspace]");
+
+        waitFor(() => {
+            expect(screen.queryByTestId('date')).not.toBeInTheDocument();
         })
-    })
+    });
 })
