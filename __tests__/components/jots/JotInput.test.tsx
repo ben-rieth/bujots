@@ -79,6 +79,32 @@ describe('Testing JotInput component', () => {
 
         waitFor(() => {
             expect(screen.queryByTestId('date')).not.toBeInTheDocument();
-        })
+        });
     });
+
+    it('allows user to overwrite selected date with date entered in text box', async () => {
+        const tomorrow = addDays(new Date(), 1);
+        const twoDays = addDays(new Date(), 2);
+
+        const user = userEvent.setup();
+        render(<JotInput />);
+
+        const textInput = screen.getByLabelText('New Jot');
+        const dateInput = screen.getByTestId('date-input');
+
+        fireEvent.change(dateInput, { target: {value: inputFormat(twoDays)}});
+
+        expect(screen.getByTestId('date')).toBeInTheDocument();
+        //expect(screen.getByTestId('date')).toHaveTextContent(displayFormat(twoDays));
+
+        await user.click(textInput);
+        await user.type(textInput, 'home due tomorrow');
+
+        waitFor(() => {
+            expect(screen.getByTestId('date')).toHaveTextContent(displayFormat(tomorrow));
+        });
+        
+    })
+
+
 })

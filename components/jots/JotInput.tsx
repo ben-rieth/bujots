@@ -16,8 +16,6 @@ const JotInput = () => {
             const parsed = chrono.parseDate(text, new Date(), { forwardDate: true});
             if (parsed !== null) {
                 setSelectedDate(parsed)
-            } else {
-                setSelectedDate(undefined);
             }
         },
         500
