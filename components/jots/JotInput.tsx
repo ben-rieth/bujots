@@ -65,7 +65,7 @@ const JotInput = () => {
                                 id="is-important" 
                                 className="hidden peer"
                             />
-                            <BsExclamationSquareFill data-testid="important" className="fill-slate-300 peer-checked:fill-rose-500"/>
+                            <BsExclamationSquareFill data-testid="important" className="fill-slate-300 peer-checked:fill-rose-500 w-5 h-5"/>
                         </label>
                             
                         <label htmlFor="date" className="relative">
@@ -80,7 +80,7 @@ const JotInput = () => {
                                 value={inputFormat(selectedDate)}
                                 data-testid="date-input"
                             />
-                            <BsFillCalendarEventFill data-testid="calendar" className="fill-slate-500"/>
+                            <BsFillCalendarEventFill data-testid="calendar" className="fill-slate-500 w-5 h-5"/>
                             
                         </label>
                         
