@@ -1,7 +1,25 @@
-import { FormEvent } from "react";
+import { startOfToday } from "date-fns";
+import { ChangeEvent, FormEvent, useState } from "react";
 import { BsExclamationSquareFill, BsFillCalendarEventFill } from 'react-icons/bs';
 
+import { inputFormat, displayFormat } from "lib/formatDates";
+
 const JotInput = () => {
+
+    const today = startOfToday();
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>(today);
+    const [dateChanged, setDateChanged] = useState<boolean>(false);
+
+    const dateChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
+        if (!dateChanged) setDateChanged(true);
+
+        if (event.target.value === '' || event.target.value === undefined) {
+            setSelectedDate(undefined);
+            setDateChanged(false);
+        } else {
+            setSelectedDate(new Date(event.target.value));
+        }
+    }
 
     const submitHandler = (event: FormEvent) => {
         event.preventDefault();
@@ -10,6 +28,8 @@ const JotInput = () => {
         
         const formData = new FormData(form);
         const data = Object.fromEntries(formData);
+
+        if (!dateChanged) delete data.date;
 
         console.log(data);
     }
@@ -36,7 +56,7 @@ const JotInput = () => {
                 </div>
 
                 <div className="flex items-center justify-between px-1">
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
                             
                         <label htmlFor="is-important">
                             <input 
@@ -48,8 +68,27 @@ const JotInput = () => {
                             <BsExclamationSquareFill data-testid="important" className="fill-slate-300 peer-checked:fill-rose-500"/>
                         </label>
                             
+                        <label htmlFor="date" className="relative">
+
+                            <input 
+                                min={inputFormat(today)}
+                                type="datetime-local" 
+                                name="date" 
+                                id="date" 
+                                className="absolute left-0 top-0 w-full h-full opacity-0"
+                                onChange={dateChangeHandler}
+                                value={inputFormat(selectedDate)}
+                                data-testid="date-input"
+                            />
+                            <BsFillCalendarEventFill data-testid="calendar" className="fill-slate-500"/>
+                            
+                        </label>
                         
-                        <BsFillCalendarEventFill data-testid="calendar" className="fill-slate-500"/>
+                        {selectedDate && dateChanged && 
+                            <>
+                                <p className="text-sm" data-testid="date">{displayFormat(selectedDate)}</p>
+                            </>
+                        }
                     </div>
                     
                     <button className="text-sky-500 font-semibold">Add</button>
