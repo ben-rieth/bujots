@@ -1,4 +1,5 @@
 import { FormEvent } from "react";
+import { BsExclamationSquareFill, BsFillCalendarEventFill } from 'react-icons/bs';
 
 const JotInput = () => {
 
@@ -16,15 +17,15 @@ const JotInput = () => {
     return (
         <div className="fixed bottom-16 left-0 right-0 bg-white">
             
-            <form name="new-jot" onSubmit={submitHandler} className="">
-                <div className="relative w-fit mx-auto">
+            <form name="new-jot" onSubmit={submitHandler} className="flex flex-col px-3 gap-3">
+                <div className="relative">
                     <input 
                         type="text"
                         name="jot-text" 
                         id="jot-text"
                         placeholder=" "
                         minLength={1}
-                        className="border-b-2 border-slate-300  focus:border-sky-500 outline-none px-2 py-1 peer text-base"
+                        className="border-b-2 border-slate-300  focus:border-sky-500 outline-none px-2 py-1 peer text-base w-full"
                     />
                     <label 
                         htmlFor="jot-text"
@@ -33,8 +34,28 @@ const JotInput = () => {
                         New Jot
                     </label>
                 </div>
+
+                <div className="flex items-center justify-between px-1">
+                    <div className="flex gap-2">
+                            
+                        <label htmlFor="is-important">
+                            <input 
+                                type="checkbox" 
+                                name="important" 
+                                id="is-important" 
+                                className="hidden peer"
+                            />
+                            <BsExclamationSquareFill data-testid="important" className="fill-slate-300 peer-checked:fill-rose-500"/>
+                        </label>
+                            
+                        
+                        <BsFillCalendarEventFill data-testid="calendar" className="fill-slate-500"/>
+                    </div>
+                    
+                    <button className="text-sky-500 font-semibold">Add</button>
+                </div>
             </form>
-            
+
         </div>
         
     )
