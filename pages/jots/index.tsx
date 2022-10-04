@@ -10,6 +10,7 @@ import { FC, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 import DateHeader from "components/jots/DateHeader";
+import JotInput from "components/jots/JotInput";
 
 type JotPageProps = {
     user: User
@@ -27,6 +28,7 @@ const JotPage:FC<JotPageProps> = ({ user }) => {
                 onForwardClick={() => setDate(addDays(date, 1))}
             />
             <DailyList />
+            <JotInput />
         </div>
         
     )
