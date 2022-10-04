@@ -2,13 +2,13 @@ import { FC } from "react";
 import DateHeader from "./DateHeader";
 
 type DailyListProps = {
-    date: Date;
+    
 }
 
-const DailyList:FC<DailyListProps> = ({ date }) => {
+const DailyList:FC<DailyListProps> = () => {
     return (
         <section>
-            <DateHeader date={date}/>
+            <p>Daily</p>
         </section>
     )
 }

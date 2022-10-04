@@ -2,12 +2,14 @@
 import { User } from "@prisma/client";
 import DailyList from "components/jots/DailyList";
 import JotList from "components/jots/JotList";
-import { startOfTomorrow } from "date-fns";
+import { startOfToday,  addDays, subDays } from "date-fns";
 import { GetServerSideProps } from "next";
 import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { FC, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
+
+import DateHeader from "components/jots/DateHeader";
 
 type JotPageProps = {
     user: User
@@ -15,8 +17,18 @@ type JotPageProps = {
 
 const JotPage:FC<JotPageProps> = ({ user }) => {
 
+    const [date, setDate] = useState<Date>(startOfToday());
+
     return (
-        <DailyList date={startOfTomorrow()}/>
+        <div>
+            <DateHeader 
+                date={date} 
+                onBackClick={() => setDate(subDays(date, 1))}
+                onForwardClick={() => setDate(addDays(date, 1))}
+            />
+            <DailyList />
+        </div>
+        
     )
 
     // const [days, setDays] = useState<number>(7);
