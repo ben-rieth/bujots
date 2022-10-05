@@ -28,14 +28,15 @@ const JotPage:FC<JotPageProps> = ({ user }) => {
 
     return (
         <>
-            <InfiniteScroll
+            {/* <InfiniteScroll
                 next={loadMoreHandler}
                 loader={<h3>Loading</h3>}
                 hasMore={days < 16}
                 dataLength={lists.length}
             >
                 {lists}
-            </InfiniteScroll>
+            </InfiniteScroll> */}
+            <JotList daysAgo={0}/>
             <JotInput />
         </>
         

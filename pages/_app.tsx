@@ -1,18 +1,20 @@
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 import { Toaster } from 'react-hot-toast'
-import Layout from 'components/layout'
-import {SessionProvider as AuthProvider } from 'next-auth/react';
+import Layout from 'components/layout';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-function MyApp({ Component, pageProps: {session, ...pageProps} }: AppProps) {
+function MyApp({ Component, pageProps}: AppProps) {
+
+  const client = new QueryClient();
 
   return (
     <>
-      <AuthProvider session={session}>
+      <QueryClientProvider client={client}>
         <Layout>
           <Component {...pageProps} />
         </Layout>
-      </AuthProvider>
+      </QueryClientProvider>
       <Toaster position="bottom-center"/>
     </>
   )
