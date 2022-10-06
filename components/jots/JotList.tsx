@@ -1,100 +1,50 @@
-import { Jot, Status, Type } from "@prisma/client";
-import { FC, useEffect, useState } from "react";
-import useSWR, { Fetcher, useSWRConfig } from "swr";
+import { Jot } from "@prisma/client";
+import { FC, useCallback } from "react";
 import axios from 'axios';
 import DateHeader from "./DateHeader";
 import JotListItem from "./JotListItem";
-import JotForm from "./JotForm";
-import { IoAdd } from "react-icons/io5";
-import { isToday, startOfToday, sub } from "date-fns";
+import {startOfToday, sub } from "date-fns";
 import JotSkeletonLoader from "./JotSkeletonLoader";
+import { useQuery} from "@tanstack/react-query";
 
 type JotListProps = {
     daysAgo: number
 }
 
-const fetcher: Fetcher<Jot[], string> = ( url:string ) => axios.get(url).then(res => res.data);
+const JotList:FC<JotListProps> = ({ daysAgo = 0}) => {
 
-const JotList: FC<JotListProps> = ({ daysAgo=0}) => {
+    const date = sub(startOfToday(), {days: daysAgo});
 
-    const date = sub(startOfToday(), {days: daysAgo})
+    const fetchJots = useCallback(async () => {
+        const res = await axios.get(`/api/jots?daysAgo=${daysAgo}`)
+        return res.data;
+    }, [daysAgo]);
 
-    const [jots, setJots] = useState<Jot[]>([]);
-    const [newJotFormVisible, setNewJotFormVisible] = useState<boolean>(false);
-
-    const swrOptions = daysAgo === 0 ? { refreshInterval: 1000 } : {};
-
-    const { data, error, mutate } = useSWR(`/api/jots?daysAgo=${daysAgo}`, fetcher, swrOptions);
-    const loading = !data && !error;
-
-    useEffect(() => {
-        if(data) {
-            setJots(data)
-        }
-    }, [data]);
-
-    const addJot = async (values: Partial<Jot>) => {
-        
-        const tempJot : Jot = {
-            important: values.important!,
-            status: values.status!,
-            type: values.type!,
-            content: values.content!,
-            id: 'id',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            date: new Date()
-        }
-
-        setJots([...jots, tempJot]);
-
-        await axios.post('/api/jots', values).then(res => res.data);
-        mutate()
-    }
-
-    const closeForm = () => setNewJotFormVisible(false);
-    const openForm = () => setNewJotFormVisible(true)
-
-    if (jots.length === 0) {
-        return <section></section>
-    }
+    const { data, status, error } = useQuery(['jots', date], fetchJots)
 
     return (
-        <section data-testid="section" className="mb-3">
-            <DateHeader date={date}/>
+        <section className="mb-3">
+            {data?.length > 0 && <DateHeader date={date}/>}
+            {status === 'success' && (<>
+                
+                {data.map((jot: Jot) => {
+                    return (
+                        <div key={jot.id}>
+                            <JotListItem jot={jot} isToday={daysAgo === 0}/>
+                            <hr />
+                        </div>
+                    )
+                })}
+            </>)}
 
-            {loading && 
-                <>
-                    <JotSkeletonLoader />
-                    <JotSkeletonLoader />
-                    <JotSkeletonLoader />
-                    <JotSkeletonLoader />
-                </>
-            }
+            {status === 'loading' &&(<>
+                {Array(4).forEach((_) => <JotSkeletonLoader />)}
+            </>)}
 
-            {data && Array.isArray(data) && data.map((jot: Jot) => {
-                return (
-                    <div key={jot.id}>
-                        <JotListItem jot={jot} isToday={daysAgo === 0}/>
-                        <hr />
-                    </div>
-                )     
-            })}
-
-            {newJotFormVisible && (
-                <JotForm onSubmit={addJot} done={closeForm} />
-            )} 
-
-            {(!newJotFormVisible && isToday(date) && !loading) &&(
-                <button 
-                    className="flex items-center"
-                    onClick={openForm}
-                >
-                    <IoAdd data-testid="add" className="w-6 h-6"/>
-                    <p className="text-lg">New Jot</p>
-                </button>
-            )}
-            
+            {error instanceof Error && (<>
+                <h2>There was an error</h2>
+                <p role="alert">{error.message}</p>
+            </>)}
         </section>
     )
 }

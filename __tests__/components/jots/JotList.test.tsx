@@ -7,9 +7,10 @@ import { setupServer } from 'msw/node';
 
 import JotList from 'components/jots/JotList';
 import { returnedJots } from 'mock/FakeJots';
+import { renderWithClient } from 'utils/tests';
 
 const server = setupServer(
-    rest.get('/api/jots', (req, res, ctx) => {
+    rest.get('/api/jots', (_req, res, ctx) => {
         return res(
             ctx.status(200),
             ctx.json(returnedJots)
@@ -17,17 +18,23 @@ const server = setupServer(
     })
 );
 
-beforeAll(() => server.listen());
+beforeAll(() => {
+    server.listen()
+});
 
-afterAll(() => server.close());
-afterEach(() => server.resetHandlers())
+afterAll(() => {
+    server.close();
+});
+afterEach(() => {
+    server.resetHandlers();
+    jest.clearAllTimers();
+})
 
 describe("Testing JotList Component", () => {
-
     it('contains a header for the specified date', () => {
         const today = format(startOfToday(), 'MMMM d, yyyy')
 
-        render(<JotList daysAgo={0} />);
+        renderWithClient(<JotList daysAgo={0} />);
 
         waitFor(() => {
             expect(screen.getByRole('heading').textContent).toBe(today);
@@ -35,34 +42,71 @@ describe("Testing JotList Component", () => {
         
     });
 
-    it("reveals JotForm when Add Jot is clicked", async () => {
-        const user = userEvent.setup();
-        
-        render(<JotList daysAgo={0}/>);
+    it("gets jots from the server and displays them on screen", async () => {
+        renderWithClient(<JotList daysAgo={0} />);
 
-        const addBtn = screen.getByTestId('add')
-        expect(addBtn).toBeInTheDocument();
-
-        await user.click(addBtn);
-        expect(addBtn).not.toBeInTheDocument();
-        expect(screen.getByRole('form')).toBeInTheDocument();
-    });
-
-    it("does not show Add Jot btn when not today", () => {
-        const yesterday = startOfYesterday();
-
-        render(<JotList daysAgo={1} />);
-
-        const addBtn = screen.queryByTestId('add');
-        expect(addBtn).not.toBeInTheDocument();
-    });
-
-    it("gets jots from the server and displays them on screen", () => {
-        render(<JotList daysAgo={0}/>);
-
-        const jots = screen.getAllByRole('article');
+        const jots = await screen.findAllByRole('article');
 
         expect(jots.length).toBe(2);
     });
+
+    it('displays nothing when no jots are returned', () => {
+        server.use(
+            rest.get('/api/jots', (_req, res, ctx) => {
+                return res(
+                    ctx.status(200)
+                )
+            })
+        );
+
+        renderWithClient(<JotList daysAgo={0} />);
+
+        waitFor(() => {
+            expect(screen.queryByRole('heading')).not.toBeInTheDocument();
+            expect(screen.queryAllByRole('article').length).toBe(0);
+        })
+    });
+
+    it('displays error message when server returns error', async () => {
+        server.use(
+            rest.get('/api/jots', (_req, res, ctx) => {
+                return res(
+                    ctx.status(500)
+                    
+                )
+            })
+        );
+
+        renderWithClient(<JotList daysAgo={0} />);
+
+        const heading = await screen.findByRole('heading');
+        const message = await screen.findByRole('alert');
+
+        expect(heading).toHaveTextContent("There was an error");
+        expect(message).toHaveTextContent("Request failed with status code 500");
+
+    });
+
+    it('displays loader while waiting for information', () => {
+        server.use(
+            rest.get('/api/jots', (_req, res, ctx) => {
+                return res(
+                    ctx.delay(2000),
+                    ctx.status(200),
+                    ctx.json(returnedJots)
+                )
+            })
+        );
+
+        renderWithClient(<JotList daysAgo={0} />);
+
+        waitFor(() => {
+            expect(screen.getAllByTestId('loader').length).toBe(4)
+        });
+
+        waitFor(() => {
+            expect(screen.getAllByRole('article').length).toBe(2);
+        });
+    })
 
 })
