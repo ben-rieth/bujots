@@ -51,7 +51,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
             const jots = await prisma.jot.findMany({
                 where: { date: targetDay },
-                orderBy: { createdAt: 'asc'}
+                orderBy: [
+                    { type: 'asc' },
+                    { createdAt: 'asc'}
+                ]
             });
 
             res.status(200).json(jots);
