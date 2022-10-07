@@ -1,4 +1,5 @@
 import { Jot, Status, Type } from "@prisma/client";
+import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { FC, useState } from "react";
 import { useSWRConfig } from "swr";
@@ -8,13 +9,54 @@ import MigrateIcon from "./MigrateIcon";
 
 type JotListItemProps = {
     jot: Jot,
-    isToday: boolean
+    date: Date
 }
 
-const JotListItem:FC<JotListItemProps> = ({ jot, isToday=false}) => {
+const JotListItem:FC<JotListItemProps> = ({ jot, date}) => {
+
+    const queryClient = useQueryClient();
+
+    const completeJotMutation = useMutation(
+        (newStatus: Status) => axios.patch(`/api/jots/${jot.id}`, { status: newStatus }),
+        {
+            onMutate: async (newStatus: Status) => {
+                await queryClient.cancelQueries(['jots', date])
+
+                const previousJots = queryClient.getQueryData<Jot[]>(['jots', date]);
+
+                if (previousJots) {
+                    
+                    queryClient.setQueryData<Jot[]>(['jots', date], 
+                        previousJots.map((j) => {
+                            if (j.id !== jot.id) return j;
+                            else return {...j, status: newStatus}
+                        })
+                    )
+                }
+
+                return { previousJots };
+            },
+
+            onError: (_err, _variables, context) => {
+                if (context?.previousJots) {
+                    queryClient.setQueryData<Jot[]>(['jots', date], context.previousJots)
+                }
+            },
+
+            onSettled: () => {
+                queryClient.invalidateQueries(['jots', date])
+            }
+        }
+    );
+
+    const toggleComplete = () => {
+        const newStatus = jot.status === "ACTIVE" ? "COMPLETED" : "ACTIVE";
+        completeJotMutation.mutate(newStatus);
+    }
+
     return (
         <article className="flex items-center gap-1 py-1">
-            <JotIcon jot={jot} onClick={() => {}} />
+            <JotIcon jot={jot} onClick={toggleComplete} />
                 <span 
                     className={`
                         flex-auto 

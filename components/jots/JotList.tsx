@@ -30,7 +30,7 @@ const JotList:FC<JotListProps> = ({ daysAgo = 0}) => {
                 {data.map((jot: Jot) => {
                     return (
                         <div key={jot.id}>
-                            <JotListItem jot={jot} isToday={daysAgo === 0}/>
+                            <JotListItem jot={jot} date={date}/>
                             <hr />
                         </div>
                     )
