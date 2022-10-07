@@ -6,8 +6,7 @@ import { getSession, useSession } from "next-auth/react";
 import { FC, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 
-import DateHeader from "components/jots/DateHeader";
-import JotInput from "components/jots/JotInput";
+import JotInput from "components/jots/forms/JotInput";
 
 type JotPageProps = {
     user: User

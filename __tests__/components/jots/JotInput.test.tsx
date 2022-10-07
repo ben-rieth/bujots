@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 
 import { inputFormat, displayFormat } from "lib/formatDates";
-import JotInput from 'components/jots/JotInput';
+import JotInput from 'components/jots/forms/JotInput';
 import { addDays, startOfTomorrow } from 'date-fns';
 
 describe('Testing JotInput component', () => {

@@ -5,31 +5,23 @@ import * as chrono from 'chrono-node';
 
 import { inputFormat, displayFormat } from "lib/formatDates";
 import { useDebouncedCallback } from "use-debounce";
+import JotTextInput from "./JotTextInput";
 
 const JotInput = () => {
 
     const today = startOfToday();
 
-    const [text, setText] = useState<string>("");
-    const debounced = useDebouncedCallback(
-        (text) => {
-            const parsed = chrono.parseDate(text, new Date(), { forwardDate: true});
-            if (parsed !== null) {
-                setSelectedDate(parsed)
-            }
-        },
-        500
-    )
-
+    const [dateChanged, setDateChanged] = useState<boolean>(false);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-    const [type, setType] = useState<string>("TASK");
 
     const dateChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
 
         if (event.target.value === '' || event.target.value === undefined) {
             setSelectedDate(undefined);
+            setDateChanged(false);
         } else {
             setSelectedDate(new Date(event.target.value));
+            setDateChanged(true);
         }
     }
 
@@ -37,45 +29,20 @@ const JotInput = () => {
         event.preventDefault();
 
         const form = event.target as HTMLFormElement;
+        form.reset();
         
         const formData = new FormData(form);
         const data = Object.fromEntries(formData);
-
-        if (!selectedDate === undefined) delete data.date;
+        if (!dateChanged) delete data.date;
 
         console.log(data);
-    }
-
-    const textChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
-        setText(event.target.value);
-        debounced(event.target.value);
     }
 
     return (
         <div className="fixed bottom-14 left-0 right-0 shadow-md-top bg-slate-50 pb-1">
             <form name="new-jot" onSubmit={submitHandler} className="flex flex-col px-3">
-                <div className="flex gap-2 items-center">
-
-                    <div className="relative flex-auto">
-                        <input 
-                            type="text"
-                            name="jot-text" 
-                            id="jot-text"
-                            placeholder=" "
-                            minLength={1}
-                            value={text}
-                            onChange={textChangeHandler}
-                            className="bg-slate-50 border-b-2 border-slate-300  focus:border-sky-500 outline-none px-2 py-1 peer text-base w-full"
-                        />
-                        <label 
-                            htmlFor="jot-text"
-                            className="invisible px-1 absolute top-[5px] left-1 text-base text-slate-300 peer-placeholder-shown:visible"
-                        >
-                            New Jot
-                        </label>
-                    </div>
-                </div>
                 
+                <JotTextInput parsedDateHandler={(date: Date) => setSelectedDate(date)}/>
                 
                 <div className="flex items-center justify-between">
                     <div className="flex gap-2 items-center">
@@ -84,8 +51,6 @@ const JotInput = () => {
                             name="type" 
                             id="type-select"
                             className="text-sm py-2 bg-slate-50"
-                            value={type}
-                            onChange={(event: ChangeEvent<HTMLSelectElement>) => setType(event.target.value)}
                         >
                             <option value="NOTE">Note</option>
                             <option value="TASK">Task</option>

@@ -26,11 +26,11 @@ model Jot {
   id        String @id @default(cuid())
   content   String
   type      Type
-  status    Status @default(ACTIVE)
-  important Boolean
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  date      DateTime @default(now()) @db.Date
+  status    Status    @default(ACTIVE)
+  important Boolean   @default(false)
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+  date      DateTime? @db.Date
 
   // userId    String
   // user      User @relation(fields: [userId], references: [id])
