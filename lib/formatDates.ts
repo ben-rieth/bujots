@@ -10,7 +10,15 @@ const inputFormat = (date: Date | undefined) => {
     return format(date, "yyyy-MM-dd'T'hh:mm")
 }
 
+const dateOnlyFormat = (date: Date | null) => {
+
+    if (!date) return null;
+    
+    return format(date, 'yyyy-MM-dd');
+}
+
 export {
     displayFormat,
-    inputFormat
+    inputFormat,
+    dateOnlyFormat
 }

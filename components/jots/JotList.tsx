@@ -6,6 +6,7 @@ import JotListItem from "./JotListItem";
 import {startOfToday, sub } from "date-fns";
 import JotSkeletonLoader from "./JotSkeletonLoader";
 import { useQuery} from "@tanstack/react-query";
+import { dateOnlyFormat } from "lib/formatDates";
 
 type JotListProps = {
     daysAgo: number
@@ -14,13 +15,14 @@ type JotListProps = {
 const JotList:FC<JotListProps> = ({ daysAgo = 0}) => {
 
     const date = sub(startOfToday(), {days: daysAgo});
+    const dateOnly = dateOnlyFormat(date);
 
     const fetchJots = useCallback(async () => {
         const res = await axios.get(`/api/jots?daysAgo=${daysAgo}`)
         return res.data;
     }, [daysAgo]);
 
-    const { data, status, error } = useQuery(['jots', date], fetchJots)
+    const { data, status, error } = useQuery(['jots', dateOnly], fetchJots)
 
     return (
         <section className="mb-3">

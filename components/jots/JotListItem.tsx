@@ -1,3 +1,4 @@
+import { dateOnlyFormat } from "lib/formatDates";
 import { Jot, Status, Type } from "@prisma/client";
 import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -14,19 +15,20 @@ type JotListItemProps = {
 
 const JotListItem:FC<JotListItemProps> = ({ jot, date}) => {
 
+    const dateOnly = dateOnlyFormat(date);
     const queryClient = useQueryClient();
 
     const completeJotMutation = useMutation(
         (newStatus: Status) => axios.patch(`/api/jots/${jot.id}`, { status: newStatus }),
         {
             onMutate: async (newStatus: Status) => {
-                await queryClient.cancelQueries(['jots', date])
+                await queryClient.cancelQueries(['jots', dateOnly])
 
-                const previousJots = queryClient.getQueryData<Jot[]>(['jots', date]);
+                const previousJots = queryClient.getQueryData<Jot[]>(['jots', dateOnly]);
 
                 if (previousJots) {
                     
-                    queryClient.setQueryData<Jot[]>(['jots', date], 
+                    queryClient.setQueryData<Jot[]>(['jots', dateOnly], 
                         previousJots.map((j) => {
                             if (j.id !== jot.id) return j;
                             else return {...j, status: newStatus}
@@ -39,12 +41,12 @@ const JotListItem:FC<JotListItemProps> = ({ jot, date}) => {
 
             onError: (_err, _variables, context) => {
                 if (context?.previousJots) {
-                    queryClient.setQueryData<Jot[]>(['jots', date], context.previousJots)
+                    queryClient.setQueryData<Jot[]>(['jots', dateOnly], context.previousJots)
                 }
             },
 
             onSettled: () => {
-                queryClient.invalidateQueries(['jots', date])
+                queryClient.invalidateQueries(['jots', dateOnly])
             }
         }
     );

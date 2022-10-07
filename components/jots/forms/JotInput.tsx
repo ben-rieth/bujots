@@ -1,11 +1,12 @@
 import { startOfToday } from "date-fns";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { BsExclamationSquareFill, BsFillCalendarEventFill } from 'react-icons/bs';
-import * as chrono from 'chrono-node';
 
-import { inputFormat, displayFormat } from "lib/formatDates";
-import { useDebouncedCallback } from "use-debounce";
+import { inputFormat, displayFormat, dateOnlyFormat } from "lib/formatDates";;
 import JotTextInput from "./JotTextInput";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { Jot, Type } from "@prisma/client";
 
 const JotInput = () => {
 
@@ -13,6 +14,45 @@ const JotInput = () => {
 
     const [dateChanged, setDateChanged] = useState<boolean>(false);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+
+    const queryClient = useQueryClient();
+
+    const addJotMutation = useMutation(
+        (jot) => axios.post('/api/jots', {
+            content: jot.content,
+            important: jot.important,
+            date: jot.date,
+            type: jot.type
+        }),
+        {
+            onMutate: async (jot: Jot) => {
+                const date = dateOnlyFormat(jot.date);
+                //input full fake jot here and then remove attributes in the axios call
+                await queryClient.cancelQueries(['jots', date]);
+
+                const previousJots = queryClient.getQueryData<Jot[]>(['jots', date])
+
+                if (previousJots) {
+                    queryClient.setQueryData<Jot[]>(['jots', date], [
+                        ...previousJots,
+                        jot
+                    ])
+                }
+
+                return { previousJots, date };
+            },
+
+            onError: (_err, _variables, context) => {
+                if(context?.previousJots) {
+                    queryClient.setQueryData<Jot[]>(['jots', context?.date], context.previousJots);
+                }
+            },
+
+            onSettled: (_data, _error, _variables, context) => {
+                queryClient.invalidateQueries(['jots', context?.date])
+            }
+        }
+    )
 
     const dateChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
 
@@ -35,7 +75,19 @@ const JotInput = () => {
         const data = Object.fromEntries(formData);
         if (!dateChanged) delete data.date;
 
-        console.log(data);
+        
+        const newJot: Jot = {
+            id: 'id',
+            content: data.content as string,
+            type: data.type as Type,
+            status: "ACTIVE",
+            important: data.important === undefined ? false : true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            date: data.date === undefined ? null : data.date as unknown as Date
+        }
+
+        addJotMutation.mutate(newJot)
     }
 
     return (
@@ -70,7 +122,7 @@ const JotInput = () => {
                         <label htmlFor="date" className="relative">
 
                             <input 
-                                min={inputFormat(today)}
+                                // min={inputFormat(today)}
                                 type="datetime-local" 
                                 name="date" 
                                 id="date" 
