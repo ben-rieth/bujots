@@ -1,13 +1,13 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "lib/prisma";
-import { startOfToday, sub } from "date-fns";
+import { parse, startOfToday, sub } from "date-fns";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     if (req.method === 'POST') {
 
-        const { content, type, important } = req.body;
-
+        const { content, type, important, date } = req.body;
+        
         if (content === undefined || type === undefined || important === undefined) {
             return res.status(400).json({
                 message: 'Missing one or more required fields'
@@ -20,15 +20,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 data: {
                     content,
                     type,
-                    important
+                    important,
+                    date
                 }
             });
 
             res.status(200).json(jot);
         } catch(err) {
+            console.log(err)
             res.status(500).json({
                 message: "Something went wrong"
-            })
+            });
         }
 
 

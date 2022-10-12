@@ -1,24 +1,35 @@
-import { startOfToday } from "date-fns";
-import { ChangeEvent, FormEvent, useState } from "react";
-import { BsExclamationSquareFill, BsFillCalendarEventFill } from 'react-icons/bs';
+import { BsExclamationSquareFill, BsFillCalendarEventFill, BsFillClockFill } from 'react-icons/bs';
 
-import { inputFormat, displayFormat, dateOnlyFormat } from "lib/formatDates";;
-import JotTextInput from "./JotTextInput";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Jot, Type } from "@prisma/client";
+import { Field, Form, Formik, FormikHelpers, FormikValues } from "formik";
+import cuid from 'cuid';
+import { dateOnlyFormat } from 'lib/formatDates';
+import { parse } from 'date-fns';
 
+type JotFormValues = {
+    content: string
+    important: boolean
+    date: string
+    type: Type
+}
+
+// TODO: Recreate form with Formik
 const JotInput = () => {
 
-    const today = startOfToday();
-
-    const [dateChanged, setDateChanged] = useState<boolean>(false);
-    const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+    const initialValues: JotFormValues = {
+        content: "",
+        type: "NOTE",
+        important: false,
+        date: ""
+    }
 
     const queryClient = useQueryClient();
 
     const addJotMutation = useMutation(
         (jot) => axios.post('/api/jots', {
+            id: jot.id,
             content: jot.content,
             important: jot.important,
             date: jot.date,
@@ -26,7 +37,7 @@ const JotInput = () => {
         }),
         {
             onMutate: async (jot: Jot) => {
-                const date = dateOnlyFormat(jot.date);
+                const date = dateOnlyFormat(jot.date)
                 //input full fake jot here and then remove attributes in the axios call
                 await queryClient.cancelQueries(['jots', date]);
 
@@ -38,8 +49,8 @@ const JotInput = () => {
                         jot
                     ])
                 }
-
-                return { previousJots, date };
+                
+                return { previousJots, date, jot };
             },
 
             onError: (_err, _variables, context) => {
@@ -52,100 +63,103 @@ const JotInput = () => {
                 queryClient.invalidateQueries(['jots', context?.date])
             }
         }
-    )
+    );
 
-    const dateChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
+    const submitHandler = (values: FormikValues, actions: FormikHelpers<JotFormValues>) => {
 
-        if (event.target.value === '' || event.target.value === undefined) {
-            setSelectedDate(undefined);
-            setDateChanged(false);
+        let datetime;
+        if (values.date === "" || values.date === null) {
+            datetime = null
         } else {
-            setSelectedDate(new Date(event.target.value));
-            setDateChanged(true);
+            datetime = parse(values.date, 'yyyy-MM-dd', new Date());
         }
-    }
 
-    const submitHandler = (event: FormEvent) => {
-        event.preventDefault();
-
-        const form = event.target as HTMLFormElement;
-        form.reset();
-        
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData);
-        if (!dateChanged) delete data.date;
-
-        
         const newJot: Jot = {
-            id: 'id',
-            content: data.content as string,
-            type: data.type as Type,
-            status: "ACTIVE",
-            important: data.important === undefined ? false : true,
+            id: cuid(),
+            content: values.content,
+            important: values.important,
+            date: datetime,
             createdAt: new Date(),
             updatedAt: new Date(),
-            date: data.date === undefined ? null : data.date as unknown as Date
+            type: values.type,
+            status: "ACTIVE"
         }
 
-        addJotMutation.mutate(newJot)
+        addJotMutation.mutate(newJot);
+
+        actions.resetForm();
     }
 
     return (
         <div className="fixed bottom-14 left-0 right-0 shadow-md-top bg-slate-50 pb-1">
-            <form name="new-jot" onSubmit={submitHandler} className="flex flex-col px-3">
-                
-                <JotTextInput parsedDateHandler={(date: Date) => setSelectedDate(date)}/>
-                
-                <div className="flex items-center justify-between">
-                    <div className="flex gap-2 items-center">
-
-                        <select 
-                            name="type" 
-                            id="type-select"
-                            className="text-sm py-2 bg-slate-50"
+            <Formik
+                initialValues={initialValues}
+                onSubmit={submitHandler}
+            >
+               <Form className="flex flex-col px-3" name="new-jot">
+                    <div className="relative flex-auto">
+                        <Field 
+                            type="text"
+                            name="content" 
+                            id="jot-text"
+                            placeholder=" "
+                            className="bg-slate-50 border-b-2 border-slate-300  focus:border-sky-500 outline-none px-2 py-1 peer text-base w-full"
+                        />
+                        <label 
+                            htmlFor="jot-text"
+                            className="invisible px-1 absolute top-[5px] left-1 text-base text-slate-300 peer-placeholder-shown:visible"
                         >
-                            <option value="NOTE">Note</option>
-                            <option value="TASK">Task</option>
-                            <option value="EVENT">Event</option>
-                        </select>
-
-                        <label htmlFor="is-important">
-                            <input 
-                                type="checkbox" 
-                                name="important" 
-                                id="is-important" 
-                                className="hidden peer"
-                            />
-                            <BsExclamationSquareFill data-testid="important" className="fill-slate-300 peer-checked:fill-rose-500 w-5 h-5"/>
+                            New Jot
                         </label>
-                            
-                        <label htmlFor="date" className="relative">
-
-                            <input 
-                                // min={inputFormat(today)}
-                                type="datetime-local" 
-                                name="date" 
-                                id="date" 
-                                className="absolute left-0 top-0 w-full h-full opacity-0"
-                                onChange={dateChangeHandler}
-                                value={inputFormat(selectedDate)}
-                                data-testid="date-input"
-                            />
-                            <BsFillCalendarEventFill data-testid="calendar" className="fill-slate-500 w-5 h-5"/>
-                            
-                        </label>
-                        
-                        {selectedDate && 
-                            <>
-                                <p className="text-xs" data-testid="date">{displayFormat(selectedDate)}</p>
-                            </>
-                        }
                     </div>
-                    
-                    <button className="text-sky-500 font-semibold">Add</button>
-                </div>
-            </form>
 
+                    <div className="flex items-center justify-between">
+                        <div className="flex gap-2 items-center">
+
+                            <Field as="select" name="type" id="type-select" className="text-sm py-2 bg-slate-50">
+                                <option value="NOTE">Note</option>
+                                <option value="TASK">Task</option>
+                                <option value="EVENT">Event</option>
+                            </Field>
+
+                            <label htmlFor="is-important">
+                                <Field
+                                    type="checkbox" 
+                                    name="important" 
+                                    id="is-important" 
+                                    className="hidden peer"
+                                />
+                                <BsExclamationSquareFill data-testid="important" className="fill-slate-300 peer-checked:fill-rose-500 w-5 h-5"/>
+                            </label>
+
+                            <label htmlFor="date" className="relative">
+
+                                <Field 
+                                    type="date"
+                                    name="date"
+                                    id="date"
+                                    className="absolute left-0 top-0 w-full h-full opacity-0"
+                                    data-testid="date-input"
+                                />
+                                <BsFillCalendarEventFill data-testid="calendar" className="fill-slate-500 w-5 h-5"/>
+                            </label>
+
+                            {/* <label htmlFor="time" className="relative">
+                                <Field 
+                                    type="time"
+                                    name="time"
+                                    id="time"
+                                    className="absolute left-0 top-0 w-full h-full opacity-0"
+                                />
+                                <BsFillClockFill data-testid="clock" className="fill-slate-500 w-5 h-5"/>
+                            </label> */}
+
+                        </div>
+
+                        <button className="text-sky-500 font-semibold" type="submit">Add</button>
+                    </div>
+                </Form> 
+            </Formik>
         </div>
         
     )

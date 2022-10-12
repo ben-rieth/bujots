@@ -23,14 +23,15 @@ enum Status {
 }
 
 model Jot {
-  id        String   @id @default(cuid())
-  content   String
-  type      Type
-  status    Status   @default(ACTIVE)
-  important Boolean  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  date      DateTime @db.Date
+  id            String    @id @default(cuid())
+  content       String
+  type          Type
+  status        Status    @default(ACTIVE)
+  important     Boolean  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  date          DateTime? @db.Date
+  time          DateTime? @db.Time(0)
 
   // userId    String
   // user      User @relation(fields: [userId], references: [id])
